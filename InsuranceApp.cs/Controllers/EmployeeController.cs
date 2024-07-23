@@ -1,6 +1,7 @@
 ﻿using InsuranceAppBLL.EmployeeService;
 using InsuranceAppRLL.Entities;
 using InsuranceMLL.EmployeeModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using UserModelLayer;
@@ -20,6 +21,7 @@ namespace InsuranceApp.Controllers
             _logger = logger;
         }
 
+        [Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
         [HttpPost]
         [Route("register")]
         public async Task<ActionResult<ResponseModel<Employee>>> CreateEmployee([FromBody] EmployeeRegistrationModel employee)

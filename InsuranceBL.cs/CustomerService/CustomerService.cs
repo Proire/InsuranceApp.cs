@@ -1,4 +1,7 @@
 ﻿using InsuranceAppRLL.CQRS.Commands.CustomerCommands;
+using InsuranceAppRLL.CQRS.Handlers.CustomerHandlers;
+using InsuranceAppRLL.CQRS.Queries.CustomerQueries;
+using InsuranceAppRLL.Entities;
 using InsuranceMLL.CustomerModels;
 using InsuranceMLL.CustomerModels.InsuranceMLL.CustomerModels;
 using MediatR;
@@ -17,6 +20,12 @@ namespace InsuranceAppBLL.CustomerService
         public CustomerService(IMediator mediator)
         {
             _mediator = mediator;
+        }
+
+        public Task<IEnumerable<Customer>> GetCustomers(int agentId)
+        {
+            var command = new GetCustomerByIdQuery(agentId);
+            return _mediator.Send(command);
         }
 
         public async Task RegisterCustomerAsync(CustomerRegistrationModel customer)

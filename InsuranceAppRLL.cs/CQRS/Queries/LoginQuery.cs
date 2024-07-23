@@ -7,15 +7,18 @@ using System.Threading.Tasks;
 
 namespace InsuranceAppRLL.CQRS.Queries
 {
-    public class LoginUserQuery : IRequest<string>
+    public class LoginQuery : IRequest<string>
     {
         public string Email { get; set; }
         public string Password { get; set; }
 
-        public LoginUserQuery(string email, string password)
+        public string Role { get; set; }   
+
+        public LoginQuery(string email, string password, string role)
         {
             Email = email;
             Password = password;
+            Role = role;
         }
     }
 }

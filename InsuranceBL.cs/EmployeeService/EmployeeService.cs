@@ -20,7 +20,7 @@ namespace InsuranceAppBLL.EmployeeService
 
         public async Task RegisterEmployeeAsync(EmployeeRegistrationModel employee)
         {
-            var command = new InsertEmployeeCommand(employee.Username, employee.Password, employee.Email, employee.FullName, employee.Role);
+            var command = new InsertEmployeeCommand(employee.Username, employee.Password, employee.Email, employee.FullName);
             await _mediator.Send(command);
         }
     }

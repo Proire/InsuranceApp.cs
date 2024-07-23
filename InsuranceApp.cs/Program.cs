@@ -1,15 +1,21 @@
 using InsuranceAppBLL.AdminService;
 using InsuranceAppBLL.CustomerService;
 using InsuranceAppBLL.EmployeeService;
+using InsuranceAppBLL.InsuranceAgentService;
+using InsuranceAppBLL.LoginService;
 using InsuranceAppRLL;
 using InsuranceAppRLL.CQRS.Handlers.AdminHandlers;
 using InsuranceAppRLL.Entities;
+using InsuranceAppRLL.Repositories.Implementations;
 using InsuranceAppRLL.Repositories.Implementations.AdminRepository;
 using InsuranceAppRLL.Repositories.Implementations.CustomerRepository;
 using InsuranceAppRLL.Repositories.Implementations.EmployeeRepository;
+using InsuranceAppRLL.Repositories.Implementations.InsuranceAgentRepository;
+using InsuranceAppRLL.Repositories.Interfaces;
 using InsuranceAppRLL.Repositories.Interfaces.AdminRepository;
 using InsuranceAppRLL.Repositories.Interfaces.CustomerRepository;
 using InsuranceAppRLL.Repositories.Interfaces.EmployeeRepository;
+using InsuranceAppRLL.Repositories.Interfaces.InsuranceAgentRepository;
 using InsuranceAppRLL.Utilities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -29,34 +35,41 @@ namespace InsuranceApp.cs
             // Add services to the container.
 
             // Logging
-            builder.Services.AddLogging(logging =>
-            {
-                logging.ClearProviders();
-                logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace); // Set minimum log level
+            //builder.Services.AddLogging(logging =>
+            //{
+            //    logging.ClearProviders();
+            //    logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace); // Set minimum log level
 
-                // Add NLog as the logging provider
-                logging.AddNLog(new NLogProviderOptions
-                {
-                    CaptureMessageTemplates = true,
-                    CaptureMessageProperties = true
-                });
-            });
+            //    // Add NLog as the logging provider
+            //    logging.AddNLog(new NLogProviderOptions
+            //    {
+            //        CaptureMessageTemplates = true,
+            //        CaptureMessageProperties = true
+            //    });
+            //});
 
             builder.Services.AddControllers();
             builder.Services.AddDbContext<InsuranceDbContext>(options => options.UseSqlServer(Environment.GetEnvironmentVariable("InsuranceDbConnection")));
 
             // Register Repositories
             builder.Services.AddScoped<IAdminCommandRepository, AdminCommandRepository>();
-            builder.Services.AddScoped<IAdminQueryRepository, AdminQueryRepository>();
+
+            builder.Services.AddScoped<ILoginRepository, LoginRepository>();
 
             builder.Services.AddScoped<IEmployeeCommandRepository,EmployeeCommandRepository>();
 
             builder.Services.AddScoped<ICustomerCommandRepository, CustomerCommandRepository>();    
 
+            builder.Services.AddScoped<IInsuranceAgentCommandRepository, InsuranceAgentCommandRepository>();  
+            
+            builder.Services.AddScoped<IInsuranceAgentQueryRepository, InsuranceAgentQueryRepository>();
+
             // Business layer services
             builder.Services.AddScoped<IAdminService,AdminService>();
             builder.Services.AddScoped<IEmployeeService, EmployeeService>(); 
             builder.Services.AddScoped<ICustomerService, CustomerService>();
+            builder.Services.AddScoped<IInsuranceAgentService, InsuranceAgentService>();    
+            builder.Services.AddScoped<ILoginService, LoginService>();  
 
             // Mediator service
             builder.Services.AddMediatR(typeof(Program).Assembly);
@@ -76,7 +89,8 @@ namespace InsuranceApp.cs
             var issuer = config["Jwt:ValidIssuer"];
             var audience = config["Jwt:ValidAudience"];
 
-            builder.Services.AddAuthentication().AddJwtBearer("AdminScheme", options =>
+            builder.Services.AddAuthentication()
+            .AddJwtBearer("AdminScheme", options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -89,7 +103,33 @@ namespace InsuranceApp.cs
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey ?? throw new Exception("Provide Secret Key")))
                 };
             })
-            .AddJwtBearer("UserScheme", options =>
+            .AddJwtBearer("CustomerScheme", options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = issuer,
+                    ValidAudience = audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey ?? throw new Exception("Provide Secret Key")))
+                };
+            })
+            .AddJwtBearer("InsuranceAgentScheme", options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = issuer,
+                    ValidAudience = audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey ?? throw new Exception("Provide Secret Key")))
+                };
+            })
+            .AddJwtBearer("EmployeeScheme", options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {

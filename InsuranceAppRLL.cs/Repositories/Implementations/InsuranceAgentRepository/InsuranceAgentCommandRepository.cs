@@ -1,7 +1,7 @@
 ﻿using BookStoreRL.Utilities;
 using InsuranceAppRLL.CustomExceptions;
 using InsuranceAppRLL.Entities;
-using InsuranceAppRLL.Repositories.Interfaces.CustomerRepository;
+using InsuranceAppRLL.Repositories.Interfaces.InsuranceAgentRepository;
 using InsuranceAppRLL.Utilities;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -12,23 +12,23 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using UserModelLayer;
 
-namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
+namespace InsuranceAppRLL.Repositories.Implementations.InsuranceAgentRepository
 {
-    public class CustomerCommandRepository : ICustomerCommandRepository
+    public class InsuranceAgentCommandRepository : IInsuranceAgentCommandRepository
     {
         private readonly InsuranceDbContext _context;
         private readonly RabitMQProducer _rabbitMqService;
 
-        public CustomerCommandRepository(InsuranceDbContext context, RabitMQProducer rabbitMqService)
+        public InsuranceAgentCommandRepository(InsuranceDbContext context, RabitMQProducer rabbitMqService)
         {
             _context = context;
             _rabbitMqService = rabbitMqService;
         }
 
-        public async Task RegisterCustomerAsync(Customer customer)
+        public async Task RegisterInsuranceAgentAsync(InsuranceAgent insuranceAgent)
         {
-            string password = customer.Password;
-            // Generate a unique key and IV for the customer
+            string password = insuranceAgent.Password;
+            // Generate a unique key and IV for the insurance agent
             using (var aes = System.Security.Cryptography.Aes.Create())
             {
                 aes.GenerateKey();
@@ -37,23 +37,23 @@ namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
                 byte[] iv = aes.IV;
 
                 // Store the key and IV in a file or secure storage
-                KeyIvManager.SaveKeyAndIv(customer.Email, key, iv);
+                KeyIvManager.SaveKeyAndIv(insuranceAgent.Email, key, iv);
 
-                // Hash the customer's password using the generated key and IV
-                customer.Password = PasswordHasher.HashPassword(customer.Password, key, iv);
+                // Hash the insurance agent's password using the generated key and IV
+                insuranceAgent.Password = PasswordHasher.HashPassword(insuranceAgent.Password, key, iv);
             }
 
             try
             {
-                await _context.Customers.AddAsync(customer);
+                await _context.InsuranceAgents.AddAsync(insuranceAgent);
                 await _context.SaveChangesAsync();
 
                 // Send confirmation email with credentials using RabbitMQ
                 var emailDto = new EmailDTO
                 {
-                    To = customer.Email,
-                    Subject = "Customer Registration Confirmation",
-                    Body = $"Dear {customer.FullName},\n\nYour customer account has been successfully created.\n\nYour login credentials are:\nEmail: {customer.Email}\nPassword: {password}.\n\nBest regards,\nInsuranceApp Team"
+                    To = insuranceAgent.Email,
+                    Subject = "Insurance Agent Registration Confirmation",
+                    Body = $"Dear {insuranceAgent.FullName},\n\nYour insurance agent account has been successfully created.\n\nYour login credentials are:\nEmail: {insuranceAgent.Email}\nPassword: {password}.\n\nBest regards,\nInsuranceApp Team"
                 };
 
                 string message = JsonSerializer.Serialize(emailDto);
@@ -62,12 +62,12 @@ namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
             catch (DbUpdateException ex)
             {
                 // Handle specific database update exceptions
-                throw new CustomerException("An error occurred while registering the customer.", ex);
+                throw new InsuranceAgentException("An error occurred while registering the insurance agent.", ex);
             }
             catch (Exception ex)
             {
                 // Handle other exceptions
-                throw new CustomerException("An unexpected error occurred.", ex);
+                throw new InsuranceAgentException("An unexpected error occurred.", ex);
             }
         }
     }

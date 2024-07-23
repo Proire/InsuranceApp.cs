@@ -29,10 +29,5 @@ namespace InsuranceMLL.EmployeeModels
         [RegularExpression(@"^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$", ErrorMessage = "Password must be at least 8 characters long, contain at least one uppercase letter, one number, and one special character.")]
         [DefaultValue("EmployeePass123!")]
         public string Password { get; set; } = "EmployeePass123!";
-
-        [Required(ErrorMessage = "Role is required.")]
-        [RegularExpression(@"^[a-zA-Z\s]{2,50}$", ErrorMessage = "Role must be between 2 and 50 characters long and contain only letters and spaces.")]
-        [DefaultValue("Staff")]
-        public string Role { get; set; } = "Staff";
     }
 }
