@@ -27,7 +27,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.SchemeRepository
                 List<Scheme> schemas = await _context.Schemes.Where(s => s.PlanID == planId).ToListAsync();
                 if (schemas == null)
                 {
-                    throw new InsurancePlanException("Currently, we are not providing any Schema under this Plan");
+                    throw new SchemeException("Currently, we are not providing any Schema under this Plan");
                 }
                 return schemas;
             }
@@ -44,7 +44,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.SchemeRepository
                 Scheme? scheme = await _context.Schemes.FindAsync(schemeId);
                 if (scheme == null)
                 {
-                    throw new InsurancePlanException("Policy does not exists");
+                    throw new SchemeException("Policy does not exists");
                 }
                 return scheme;
             }

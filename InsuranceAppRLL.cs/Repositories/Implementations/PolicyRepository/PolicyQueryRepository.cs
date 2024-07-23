@@ -27,7 +27,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.PolicyRepository
                 List<Policy> policies = await _context.Policies.Where(p=>p.CustomerID==customerId).ToListAsync();
                 if (policies == null)
                 {
-                    throw new InsurancePlanException("Customer have not purchased any insurance Plan");
+                    throw new PolicyException("Customer have not purchased any insurance Plan");
                 }
                 return policies;
             }
@@ -44,7 +44,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.PolicyRepository
                 Policy? policy = await _context.Policies.FindAsync(policyId);
                 if (policy == null)
                 {
-                    throw new InsurancePlanException("Policy does not exists");
+                    throw new PolicyException("Policy does not exists");
                 }
                 return policy;
             }
