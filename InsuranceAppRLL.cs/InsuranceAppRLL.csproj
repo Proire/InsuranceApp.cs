@@ -27,4 +27,8 @@
     <ProjectReference Include="..\InsuranceMLL.cs\InsuranceMLL.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Repositories\Implementations\InsuranceAgentRepository\" />
+  </ItemGroup>
+
 </Project>

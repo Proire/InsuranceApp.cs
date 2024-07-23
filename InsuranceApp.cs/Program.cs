@@ -1,9 +1,15 @@
 using InsuranceAppBLL.AdminService;
+using InsuranceAppBLL.CustomerService;
+using InsuranceAppBLL.EmployeeService;
 using InsuranceAppRLL;
 using InsuranceAppRLL.CQRS.Handlers.AdminHandlers;
 using InsuranceAppRLL.Entities;
 using InsuranceAppRLL.Repositories.Implementations.AdminRepository;
+using InsuranceAppRLL.Repositories.Implementations.CustomerRepository;
+using InsuranceAppRLL.Repositories.Implementations.EmployeeRepository;
 using InsuranceAppRLL.Repositories.Interfaces.AdminRepository;
+using InsuranceAppRLL.Repositories.Interfaces.CustomerRepository;
+using InsuranceAppRLL.Repositories.Interfaces.EmployeeRepository;
 using InsuranceAppRLL.Utilities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -43,8 +49,14 @@ namespace InsuranceApp.cs
             builder.Services.AddScoped<IAdminCommandRepository, AdminCommandRepository>();
             builder.Services.AddScoped<IAdminQueryRepository, AdminQueryRepository>();
 
+            builder.Services.AddScoped<IEmployeeCommandRepository,EmployeeCommandRepository>();
+
+            builder.Services.AddScoped<ICustomerCommandRepository, CustomerCommandRepository>();    
+
             // Business layer services
             builder.Services.AddScoped<IAdminService,AdminService>();
+            builder.Services.AddScoped<IEmployeeService, EmployeeService>(); 
+            builder.Services.AddScoped<ICustomerService, CustomerService>();
 
             // Mediator service
             builder.Services.AddMediatR(typeof(Program).Assembly);
