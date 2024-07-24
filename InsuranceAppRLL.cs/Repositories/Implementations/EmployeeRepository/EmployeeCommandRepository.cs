@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -63,6 +64,103 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
             {
                 // Handle specific database update exceptions
                 throw new EmployeeException("An error occurred while registering the employee.", ex);
+            }
+            catch (Exception ex)
+            {
+                // Handle other exceptions
+                throw new EmployeeException("An unexpected error occurred.", ex);
+            }
+        }
+
+        public async Task DeleteEmployeeAsync(int employeeId)
+        {
+            try
+            {
+                var employee = await _context.Employees.FindAsync(employeeId);
+                if (employee != null)
+                {
+                    _context.Employees.Remove(employee);
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    throw new EmployeeException($"No employee found with id: {employeeId}");
+                }
+            }
+            catch (DbUpdateException ex)
+            {
+                // Handle specific database update exceptions
+                throw new EmployeeException("An error occurred while deleting the employee from the database.", ex);
+            }
+            catch (Exception ex)
+            {
+                // Handle other exceptions
+                throw new EmployeeException("An unexpected error occurred.", ex);
+            }
+        }
+
+        public async Task UpdateEmployeeAsync(Employee employee)
+        {
+            try
+            {
+                var existingEmployee = await _context.Employees.FindAsync(employee.EmployeeID);
+                if (existingEmployee == null)
+                {
+                    throw new EmployeeException($"No employee found with id: {employee.EmployeeID}");
+                }
+
+                existingEmployee.Username = employee.Username;
+                existingEmployee.FullName = employee.FullName;
+
+                if (existingEmployee.Email != employee.Email)
+                {
+                    // Generate a unique key and IV for the employee
+                    using (var aes = Aes.Create())
+                    {
+                        aes.GenerateKey();
+                        aes.GenerateIV();
+                        byte[] key = aes.Key;
+                        byte[] iv = aes.IV;
+
+                        // Store the key and IV in a file or secure storage
+                        KeyIvManager.SaveKeyAndIv(employee.Email, key, iv);
+
+                        // Hash the employee's password using the generated key and IV
+                        existingEmployee.Password = PasswordHasher.HashPassword(employee.Password, key, iv);
+                        existingEmployee.Email = employee.Email;
+                    }
+                }
+
+                if (existingEmployee.Password != employee.Password)
+                {
+                    // Generate a unique key and IV for the employee
+                    using (Aes aes = Aes.Create())
+                    {
+                        aes.GenerateKey();
+                        aes.GenerateIV();
+                        byte[] key = aes.Key;
+                        byte[] iv = aes.IV;
+
+                        // Store the key and IV in a file
+                        KeyIvManager.UpdateKeyAndIv(employee.Email, key, iv);
+
+                        // Hash the employee's password using the generated key and IV
+                        existingEmployee.Password = PasswordHasher.HashPassword(employee.Password, key, iv);
+                    }
+                }
+
+                _context.Employees.Update(existingEmployee);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                // Handle concurrency conflicts
+                throw new EmployeeException("A concurrency conflict occurred while updating the employee.", ex);
+            }
+            catch (DbUpdateException ex)
+            {
+                // Handle specific database update exceptions
+                throw new EmployeeException("An error occurred while updating the employee in the database.", ex);
             }
             catch (Exception ex)
             {

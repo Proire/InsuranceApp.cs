@@ -35,5 +35,14 @@ namespace InsuranceAppBLL.InsuranceAgentService
             var command = new InsertInsuranceAgentCommand(agent.Username, agent.Password, agent.Email, agent.FullName);
             await _mediator.Send(command);
         }
+        public async Task DeleteAgentAsync(int agentId)
+        {
+            await _mediator.Send(new DeleteInsuranceAgentCommand(agentId));
+        }
+
+        public async Task UpdateAgentAsync(AgentUpdateModel agent, int agentId)
+        {
+            await _mediator.Send(new UpdateInsuranceAgentCommand(agent.Username, agent.Password, agent.Email, agent.FullName, agentId));
+        }
     }
 }

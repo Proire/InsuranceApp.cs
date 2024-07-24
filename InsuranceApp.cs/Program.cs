@@ -49,21 +49,21 @@ namespace InsuranceApp.cs
             //});
 
             builder.Services.AddControllers();
-            builder.Services.AddDbContext<InsuranceDbContext>(options => options.UseSqlServer(Environment.GetEnvironmentVariable("InsuranceDbConnection")));
+            builder.Services.AddDbContext<InsuranceDbContext>(options => options.UseSqlServer(Environment.GetEnvironmentVariable("InsuranceDbConnection") ?? string.Empty));
 
             // Register Repositories
             builder.Services.AddScoped<IAdminCommandRepository, AdminCommandRepository>();
+            builder.Services.AddScoped<IAdminQueryRepository, AdminQueryRepository>();  
 
             builder.Services.AddScoped<ILoginRepository, LoginRepository>();
 
             builder.Services.AddScoped<IEmployeeCommandRepository,EmployeeCommandRepository>();
+            builder.Services.AddScoped<IEmployeeQueryRepository, EmployeeQueryRepository>();
 
             builder.Services.AddScoped<ICustomerCommandRepository, CustomerCommandRepository>();    
-
-            builder.Services.AddScoped<ICustomerQueryRepository, CustomerQueryRepository>();    
+            builder.Services.AddScoped<ICustomerQueryRepository, CustomerQueryRepository>(); 
 
             builder.Services.AddScoped<IInsuranceAgentCommandRepository, InsuranceAgentCommandRepository>();  
-            
             builder.Services.AddScoped<IInsuranceAgentQueryRepository, InsuranceAgentQueryRepository>();
 
             // Business layer services

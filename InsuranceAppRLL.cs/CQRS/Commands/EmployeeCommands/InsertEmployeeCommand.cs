@@ -15,12 +15,15 @@ namespace InsuranceAppRLL.CQRS.Commands.EmployeeCommands
         public string Email { get; set; }
         public string FullName { get; set; }
 
-        public InsertEmployeeCommand(string username, string password, string email, string fullName)
+        public string Role { get; set; }    
+
+        public InsertEmployeeCommand(string username, string password, string email, string fullName, string role)
         {
             Username = username;
             Password = password;
             Email = email;
             FullName = fullName;
+            Role = role;    
         }
     }
 }

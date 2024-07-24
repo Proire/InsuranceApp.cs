@@ -10,5 +10,9 @@ namespace InsuranceAppRLL.Repositories.Interfaces.CustomerRepository
     public interface ICustomerCommandRepository
     {
         Task RegisterCustomerAsync(Customer customer);
+
+        Task UpdateCustomerAsync(Customer customer);
+
+        Task DeleteCustomerAsync(int customerId);
     }
 }

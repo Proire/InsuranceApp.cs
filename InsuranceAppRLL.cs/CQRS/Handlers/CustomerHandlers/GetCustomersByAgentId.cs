@@ -10,14 +10,14 @@ using System.Threading.Tasks;
 
 namespace InsuranceAppRLL.CQRS.Handlers.CustomerHandlers
 {
-    public class GetCustomersByAgentId : IRequestHandler<GetCustomerByIdQuery, IEnumerable<Customer>>
+    public class GetCustomersByAgentId : IRequestHandler<GetCustomerByAgentIdQuery, IEnumerable<Customer>>
     {
         private readonly ICustomerQueryRepository _customerQueryRepository;
         public GetCustomersByAgentId(ICustomerQueryRepository customerQueryRepository)
         {
             _customerQueryRepository = customerQueryRepository;
         }
-        public async Task<IEnumerable<Customer>> Handle(GetCustomerByIdQuery request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Customer>> Handle(GetCustomerByAgentIdQuery request, CancellationToken cancellationToken)
         {
             return await _customerQueryRepository.GetCustomersByAgentId(request.AgentId);
         }

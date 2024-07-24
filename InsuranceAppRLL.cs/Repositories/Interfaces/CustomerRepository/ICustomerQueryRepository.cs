@@ -10,5 +10,9 @@ namespace InsuranceAppRLL.Repositories.Interfaces.CustomerRepository
     public interface ICustomerQueryRepository
     {
         Task<IEnumerable<Customer>> GetCustomersByAgentId(int agentId);
+
+        Task<IEnumerable<Customer>> GetAllCustomersAsync();
+
+        Task<Customer> GetCustomerByIdAsync(int customerId);
     }
 }

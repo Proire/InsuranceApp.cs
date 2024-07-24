@@ -34,7 +34,7 @@ namespace InsuranceAppRLL.CQRS.Handlers.EmployeeHandlers
                 Email = request.Email,
                 FullName = request.FullName,
                 CreatedAt = DateTime.UtcNow,
-                Role = "Scheme_Manager"
+                Role = request.Role
             };
 
             await _repository.RegisterEmployeeAsync(employee);

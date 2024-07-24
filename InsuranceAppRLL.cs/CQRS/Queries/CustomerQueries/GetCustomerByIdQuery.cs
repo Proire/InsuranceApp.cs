@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace InsuranceAppRLL.CQRS.Queries.CustomerQueries
 {
-    public class GetCustomerByIdQuery : IRequest<IEnumerable<Customer>>
+    public class GetCustomerByAgentIdQuery : IRequest<IEnumerable<Customer>>
     {
         public int AgentId { get; }
 
-        public GetCustomerByIdQuery(int agentId)
+        public GetCustomerByAgentIdQuery(int agentId)
         {
             AgentId = agentId;
         }

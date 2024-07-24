@@ -2,7 +2,6 @@
 using InsuranceAppRLL.CustomExceptions;
 using InsuranceAppRLL.Entities;
 using InsuranceMLL.CustomerModels;
-using InsuranceMLL.CustomerModels.InsuranceMLL.CustomerModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -55,16 +54,12 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = "AgentScheme", Roles = "Agent")]
         [HttpGet]
-        [Route("/agent/customers")]
-        public async Task<ResponseModel<IEnumerable<Customer>>> GetCustomersByAgentIdAsync()
+        [Route("/agent/customers/{agentId}")]
+        public async Task<ResponseModel<IEnumerable<Customer>>> GetCustomersByAgentIdAsync(int agentId)
         {
             try
             {
-                // Extract AgentID from the JWT token
-                int agentId = Convert.ToInt32(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-
                 // Call the repository method to get the customers
                 var customers = await _customerService.GetCustomers(agentId);
 
@@ -99,7 +94,117 @@ namespace InsuranceApp.Controllers
                 // Handle all other exceptions
                 return new ResponseModel<IEnumerable<Customer>>
                 {
-                    Message = "An unexpected error occurred.",
+                    Message = "An unexpected error occurred. "+ex.Message,
+                    Status = false
+                };
+            }
+        }
+
+        [HttpPut("{customerId}")]
+        public async Task<ActionResult<ResponseModel<string>>> UpdateCustomer([FromBody] CustomerUpdateModel customerUpdateModel, int customerId)
+        {
+            try
+            {
+                await _customerService.UpdateCustomerAsync(customerUpdateModel, customerId);
+                return new ResponseModel<string>
+                {
+                    Message = "Customer updated successfully",
+                    Status = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseModel<string>
+                {
+                    Message = ex.Message,
+                    Status = false
+                };
+            }
+        }
+
+        [HttpDelete("{customerId}")]
+        public async Task<ActionResult<ResponseModel<string>>> DeleteCustomer(int customerId)
+        {
+            try
+            {
+                await _customerService.DeleteCustomerAsync(customerId);
+                return new ResponseModel<string>
+                {
+                    Message = "Customer deleted successfully",
+                    Status = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseModel<string>
+                {
+                    Message = ex.Message,
+                    Status = false
+                };
+            }
+        }
+
+        [HttpGet("{customerId}")]
+        public async Task<ActionResult<ResponseModel<Customer>>> GetCustomerById(int customerId)
+        {
+            try
+            {
+                var customer = await _customerService.GetCustomerByIdAsync(customerId);
+                if (customer == null)
+                {
+                    return new ResponseModel<Customer>
+                    {
+                        Data = new Customer(),
+                        Message = $"No customer found with id: {customerId}",
+                        Status = false
+                    };
+                }
+                return new ResponseModel<Customer>
+                {
+                    Data = customer,
+                    Message = "Customer retrieved successfully",
+                    Status = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseModel<Customer>
+                {
+                    Data = new Customer(),
+                    Message = ex.Message,
+                    Status = false
+                };
+            }
+        }
+
+        [HttpGet("/getallCustomers")]
+        public async Task<ActionResult<ResponseModel<IEnumerable<Customer>>>> GetAllCustomers()
+        {
+            try
+            {
+                var customers = await _customerService.GetAllCustomersAsync();
+                if (customers == null || !customers.Any())
+                {
+                    return new ResponseModel<IEnumerable<Customer>>
+                    {
+                        Data = new List<Customer>(),
+                        Message = "No customers found.",
+                        Status = false
+                    };
+                }
+                return new ResponseModel<IEnumerable<Customer>>
+                {
+                    Data = customers,
+                    Message = "Customers retrieved successfully.",
+                    Status = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseModel<IEnumerable<Customer>>
+                {
+                    Data = new List<Customer>(),
+                    Message = ex.Message,
                     Status = false
                 };
             }

@@ -109,5 +109,49 @@ namespace InsuranceApp.Controllers
                 };
             }
         }
+
+        [HttpPut("/update/{agentId}")]
+        public async Task<ResponseModel<string>> UpdateAgent([FromBody] AgentUpdateModel agentModel, int agentId)
+        {
+            try
+            {
+                await _insuranceAgentService.UpdateAgentAsync(agentModel, agentId);
+                return new ResponseModel<string>
+                {
+                    Message = "Insurance Agent updated successfully",
+                    Status = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseModel<string>
+                {
+                    Message = ex.Message,
+                    Status = false
+                };
+            }
+        }
+
+        [HttpDelete("/delete/{agentId}")]
+        public async Task<ResponseModel<string>> DeleteAgent(int agentId)
+        {
+            try
+            {
+                await _insuranceAgentService.DeleteAgentAsync(agentId);
+                return new ResponseModel<string>
+                {
+                    Message = "Insurance Agent deleted successfully",
+                    Status = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseModel<string>
+                {
+                    Message = ex.Message,
+                    Status = false
+                };
+            }
+        }
     }
 }
