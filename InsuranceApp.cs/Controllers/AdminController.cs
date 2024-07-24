@@ -52,37 +52,6 @@ namespace InsuranceApp.cs.Controllers
             }
         }
 
-        [HttpPost]
-        [Route("login")]
-        public async Task<ActionResult<ResponseModel<string>>> LoginAsync([FromBody] LoginModel model)
-        {
-            try
-            {
-                // Call the asynchronous Login method from the business logic layer (BLL)
-                string token = await _adminService.LoginAdminAsync(model);
-
-                // Prepare the response model with user data
-                var responseModel = new ResponseModel<string>
-                {
-                    Message = "Admin Logged In Successfully!",
-                    Data = token, // Return the token
-                    Status = true
-                };
-
-                return Ok(responseModel);
-            }
-            catch (Exception ex)
-            {
-                // Handle the exception and prepare the response model
-                var responseModel = new ResponseModel<string>
-                {
-                    Message = ex.Message,
-                    Data = "Try Again",
-                    Status = false
-                };
-
-                return BadRequest(responseModel);
-            }
-        }
+        
     }
 }

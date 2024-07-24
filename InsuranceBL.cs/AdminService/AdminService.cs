@@ -25,11 +25,5 @@ namespace InsuranceAppBLL.AdminService
             var command = new InsertAdminCommand(admin.Username,admin.Password,admin.Email,admin.FullName);
             await _mediator.Send(command);
         }
-
-        public async Task<string> LoginAdminAsync(LoginModel login)
-        {
-            var command = new LoginUserQuery(login.Email, login.Password);
-            return await _mediator.Send(command);
-        }
     }
 }
