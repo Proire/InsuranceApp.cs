@@ -10,6 +10,7 @@ namespace InsuranceAppRLL.Repositories.Interfaces.InsurancePlanRepository
 {
     public interface IInsurancePlanCommandRepository
     {
-        public Task AddPlan(InsurancePlan plan); 
+        public Task AddPlan(InsurancePlan plan);
+        public Task DeletePlan(int planId);
     }
 }
