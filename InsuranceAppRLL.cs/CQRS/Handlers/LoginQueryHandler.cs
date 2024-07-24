@@ -24,28 +24,8 @@ namespace InsuranceAppRLL.CQRS.Handlers
 
         public async Task<string> Handle(LoginQuery request, CancellationToken cancellationToken)
         {
-            string token;
-
-            // Perform login logic based on the role
-            switch (request.Role.ToLower())
-            {
-                case "admin":
-                    token = await _repository.LoginAdminAsync(new LoginModel(request.Email, request.Password, request.Role));
-                    break;
-                case "insuranceagent":
-                    token = await _repository.LoginInsuranceAgentAsync(new LoginModel(request.Email, request.Password, request.Role ));
-                    break;
-                case "employee":
-                    token = await _repository.LoginEmployeeAsync(new LoginModel(request.Email, request.Password, request.Role));
-                    break;
-                case "customer":
-                    token = await _repository.LoginCustomerAsync(new LoginModel(request.Email, request.Password, request.Role));
-                    break;
-                default:
-                    throw new LoginException("Invalid role specified.");
-            }
-
-            return token;
+            LoginModel model = new LoginModel(request.Email,request.Password,request.Role);
+            return await _repository.LoginAsync(model);
         }
     }
 }

@@ -24,148 +24,66 @@ namespace InsuranceAppRLL.Repositories.Implementations
             _jwtTokenGenerator = jwtTokenGenerator;
         }
 
-        public async Task<string> LoginAdminAsync(LoginModel model)
+        public async Task<string> LoginAsync(LoginModel model)
         {
-            // Check if the admin exists asynchronously
-            bool isAdmin = await _context.Admins.AnyAsync(x => x.Email == model.Email);
+            dynamic user = null;
 
-            if (isAdmin)
+            switch (model.Role.ToLower())
             {
-                // Retrieve the admin asynchronously
-                Admin? admin = await _context.Admins.FirstOrDefaultAsync(x => x.Email == model.Email);
+                case "employee":
+                    user = await _context.Employees.FirstOrDefaultAsync(x => x.Email == model.Email);
+                    break;
+                case "admin":
+                    user = await _context.Admins.FirstOrDefaultAsync(x => x.Email == model.Email);
+                    break;
+                case "customer":
+                    user = await _context.Customers.FirstOrDefaultAsync(x => x.Email == model.Email);
+                    break;
+                case "agent":
+                    user = await _context.InsuranceAgents.FirstOrDefaultAsync(x => x.Email == model.Email);
+                    break;
+                default:
+                    throw new LoginException("Invalid Role");
+            }
 
-                if (admin != null)
-                {
-                    // Retrieve the key and IV for the admin
-                    (byte[] key, byte[] iv) = KeyIvManager.GetKeyAndIv(admin.Email);
-
-                    // Verify the password
-                    byte[] cipheredPassword = Convert.FromBase64String(admin.Password);
-                    string decryptedPassword = PasswordHasher.VerifyPassword(cipheredPassword, key, iv);
-
-                    if (model.Password == decryptedPassword)
-                    {
-                        // Generate a token for the admin
-                        string token = _jwtTokenGenerator.GenerateAdminToken(Convert.ToString(admin.AdminID), admin.Username, TimeSpan.FromMinutes(15));
-
-                        return token;
-                    }
-
-                    throw new LoginException("Wrong Password, Reenter Password");
-                }
-
+            if (user == null)
+            {
                 throw new LoginException("Invalid Email, Register First");
             }
 
-            throw new LoginException("Invalid Email, Register First");
-        }
 
-        public async Task<string> LoginCustomerAsync(LoginModel model)
-        {
-            // Check if the customer exists asynchronously
-            bool isCustomer = await _context.Customers.AnyAsync(x => x.Email == model.Email);
-
-            if (isCustomer)
+            string email = user.Email;
+            string password = user.Password;
+            string id = user switch
             {
-                // Retrieve the customer asynchronously
-                Customer? customer = await _context.Customers.FirstOrDefaultAsync(x => x.Email == model.Email);
+                Employee e => e.EmployeeID.ToString(),
+                Admin a => a.AdminID.ToString(),
+                Customer c => c.CustomerID.ToString(),
+                InsuranceAgent ia => ia.AgentID.ToString(),
+                _ => throw new LoginException("Invalid Role")
+            };
 
-                if (customer != null)
-                {
-                    // Retrieve the key and IV for the customer
-                    (byte[] key, byte[] iv) = KeyIvManager.GetKeyAndIv(customer.Email);
+            string username = user.Username;
+            (byte[] key, byte[] iv) = KeyIvManager.GetKeyAndIv(email);
+            byte[] cipheredPassword = Convert.FromBase64String(password);
+            string decryptedPassword = PasswordHasher.VerifyPassword(cipheredPassword, key, iv);
 
-                    // Verify the password
-                    byte[] cipheredPassword = Convert.FromBase64String(customer.Password);
-                    string decryptedPassword = PasswordHasher.VerifyPassword(cipheredPassword, key, iv);
-
-                    if (model.Password == decryptedPassword)
-                    {
-                        // Generate a token for the customer
-                        string token = _jwtTokenGenerator.GenerateCustomerToken(Convert.ToString(customer.CustomerID), customer.FullName, TimeSpan.FromMinutes(15));
-
-                        return token;
-                    }
-
-                    throw new LoginException("Wrong Password, Reenter Password");
-                }
-
-                throw new LoginException("Invalid Email, Register First");
+            if (model.Password != decryptedPassword)
+            {
+                throw new LoginException("Wrong Password, Reenter Password");
             }
 
-            throw new LoginException("Invalid Email, Register First");
-        }
-
-        public async Task<string> LoginInsuranceAgentAsync(LoginModel model)
-        {
-            // Check if the insurance agent exists asynchronously
-            bool isAgent = await _context.InsuranceAgents.AnyAsync(x => x.Email == model.Email);
-
-            if (isAgent)
+            string token = model.Role.ToLower() switch
             {
-                // Retrieve the insurance agent asynchronously
-                InsuranceAgent? agent = await _context.InsuranceAgents.FirstOrDefaultAsync(x => x.Email == model.Email);
+                "employee" => _jwtTokenGenerator.GenerateEmployeeToken(id, username, TimeSpan.FromMinutes(15)),
+                "admin" => _jwtTokenGenerator.GenerateAdminToken(id, username, TimeSpan.FromMinutes(15)),
+                "customer" => _jwtTokenGenerator.GenerateCustomerToken(id, user.FullName, TimeSpan.FromMinutes(15)),
+                "agent" => _jwtTokenGenerator.GenerateInsuranceAgentToken(id, username, TimeSpan.FromMinutes(15)),
+                _ => throw new LoginException("Invalid Role")
+            };
 
-                if (agent != null)
-                {
-                    // Retrieve the key and IV for the insurance agent
-                    (byte[] key, byte[] iv) = KeyIvManager.GetKeyAndIv(agent.Email);
-
-                    // Verify the password
-                    byte[] cipheredPassword = Convert.FromBase64String(agent.Password);
-                    string decryptedPassword = PasswordHasher.VerifyPassword(cipheredPassword, key, iv);
-
-                    if (model.Password == decryptedPassword)
-                    {
-                        // Generate a token for the insurance agent
-                        string token = _jwtTokenGenerator.GenerateInsuranceAgentToken(Convert.ToString(agent.AgentID), agent.Username, TimeSpan.FromMinutes(15));
-
-                        return token;
-                    }
-
-                    throw new LoginException("Wrong Password, Reenter Password");
-                }
-
-                throw new LoginException("Invalid Email, Register First");
-            }
-
-            throw new LoginException("Invalid Email, Register First");
+            return token;
         }
 
-        public async Task<string> LoginEmployeeAsync(LoginModel model)
-        {
-            // Check if the employee exists asynchronously
-            bool isEmployee = await _context.Employees.AnyAsync(x => x.Email == model.Email);
-
-            if (isEmployee)
-            {
-                // Retrieve the employee asynchronously
-                Employee? employee = await _context.Employees.FirstOrDefaultAsync(x => x.Email == model.Email);
-
-                if (employee != null)
-                {
-                    // Retrieve the key and IV for the employee
-                    (byte[] key, byte[] iv) = KeyIvManager.GetKeyAndIv(employee.Email);
-
-                    // Verify the password
-                    byte[] cipheredPassword = Convert.FromBase64String(employee.Password);
-                    string decryptedPassword = PasswordHasher.VerifyPassword(cipheredPassword, key, iv);
-
-                    if (model.Password == decryptedPassword)
-                    {
-                        // Generate a token for the employee
-                        string token = _jwtTokenGenerator.GenerateEmployeeToken(Convert.ToString(employee.EmployeeID), employee.Username, TimeSpan.FromMinutes(15));
-
-                        return token;
-                    }
-
-                    throw new LoginException("Wrong Password, Reenter Password");
-                }
-
-                throw new LoginException("Invalid Email, Register First");
-            }
-
-            throw new LoginException("Invalid Email, Register First");
-        }
     }
 }
