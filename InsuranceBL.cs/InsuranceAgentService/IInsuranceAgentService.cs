@@ -15,5 +15,9 @@ namespace InsuranceAppBLL.InsuranceAgentService
         Task<IEnumerable<InsuranceAgent>> GetAllInsuranceAgents();
 
         Task<InsuranceAgent> GetInsuranceAgentAsync(int id);
+
+        Task DeleteAgentAsync(int agentId);
+
+        Task UpdateAgentAsync(AgentUpdateModel agent, int agentId);
     }
 }

@@ -10,5 +10,9 @@ namespace InsuranceAppRLL.Repositories.Interfaces.EmployeeRepository
     public interface IEmployeeCommandRepository
     {
         Task RegisterEmployeeAsync(Employee employee);
+
+        Task UpdateEmployeeAsync(Employee employee);
+
+        Task DeleteEmployeeAsync(int employeeId);
     }
 }

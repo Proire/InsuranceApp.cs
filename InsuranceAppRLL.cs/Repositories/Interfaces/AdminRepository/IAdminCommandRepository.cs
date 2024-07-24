@@ -11,6 +11,10 @@ namespace InsuranceAppRLL.Repositories.Interfaces.AdminRepository
     public interface IAdminCommandRepository
     {
         Task RegisterAdminAsync(Admin admin);
+
+        Task UpdateAdminAsync(Admin admin);
+
+        Task DeleteAdminAsync(int adminId);
     }
 
 }

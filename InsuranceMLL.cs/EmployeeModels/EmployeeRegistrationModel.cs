@@ -29,5 +29,11 @@ namespace InsuranceMLL.EmployeeModels
         [RegularExpression(@"^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$", ErrorMessage = "Password must be at least 8 characters long, contain at least one uppercase letter, one number, and one special character.")]
         [DefaultValue("EmployeePass123!")]
         public string Password { get; set; } = "EmployeePass123!";
+
+        [Required]
+        [StringLength(50)]
+        [RegularExpression(@"^Scheme Manager$", ErrorMessage = "Role must be 'Scheme Manager'")]
+        [DefaultValue("Scheme Manager")]
+        public string Role { get; set; } = string.Empty;
     }
 }

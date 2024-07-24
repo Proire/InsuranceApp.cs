@@ -23,6 +23,40 @@ namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
             _context = insuranceDbContext;
         }
 
+        public async Task<Customer> GetCustomerByIdAsync(int customerId)
+        {
+            try
+            {
+                var customer = await _context.Customers.FindAsync(customerId);
+                if (customer == null)
+                {
+                    throw new CustomerException($"No customer found with id: {customerId}");
+                }
+                return customer;
+            }
+            catch (Exception ex)
+            {
+                throw new CustomerException("An error occurred while retrieving the customer.", ex);
+            }
+        }
+
+        public async Task<IEnumerable<Customer>> GetAllCustomersAsync()
+        {
+            try
+            {
+                var customers = await _context.Customers.ToListAsync();
+                if (customers.Count == 0)
+                {
+                    throw new CustomerException("No customers found.");
+                }
+                return customers;
+            }
+            catch (Exception ex)
+            {
+                throw new CustomerException("An error occurred while retrieving the customers.", ex);
+            }
+        }
+
         // Method to get customers by agent ID
         public async Task<IEnumerable<Customer>> GetCustomersByAgentId(int agentId)
         {
