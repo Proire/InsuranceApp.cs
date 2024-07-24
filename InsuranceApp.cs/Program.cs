@@ -60,6 +60,8 @@ namespace InsuranceApp.cs
 
             builder.Services.AddScoped<ICustomerCommandRepository, CustomerCommandRepository>();    
 
+            builder.Services.AddScoped<ICustomerQueryRepository, CustomerQueryRepository>();    
+
             builder.Services.AddScoped<IInsuranceAgentCommandRepository, InsuranceAgentCommandRepository>();  
             
             builder.Services.AddScoped<IInsuranceAgentQueryRepository, InsuranceAgentQueryRepository>();
