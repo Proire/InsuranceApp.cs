@@ -9,7 +9,7 @@ namespace InsuranceAppRLL.Repositories.Interfaces.PolicyRepository
 {
     public interface IPolicyQueryRepository
     {
-        public Task<List<Policy>> getAllPoliciesForCustomer(int customerId);
-        public Task<Policy> getPolicy(int policyId);
+        public Task<List<Policy>> GetAllPoliciesForCustomer(int customerId);
+        public Task<Policy> GetPolicy(int policyId);
     }
 }

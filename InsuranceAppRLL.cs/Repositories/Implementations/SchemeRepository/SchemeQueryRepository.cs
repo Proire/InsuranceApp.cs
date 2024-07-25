@@ -20,7 +20,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.SchemeRepository
             _context = context;
         }
 
-        public async Task<List<Scheme>> getAllSchemasForPlan(int planId)
+        public async Task<List<Scheme>> GetAllSchemasForPlan(int planId)
         {
             try
             {
@@ -37,7 +37,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.SchemeRepository
             }
         }
 
-        public async Task<Scheme> getScheme(int schemeId)
+        public async Task<Scheme> GetScheme(int schemeId)
         {
             try
             {

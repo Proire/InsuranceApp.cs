@@ -24,7 +24,7 @@ namespace InsuranceApp.cs.Controllers
         }
 
         [HttpPost]
-        [Route("register")]
+        [Route("/admin_user/register")]
         public async Task<ActionResult<ResponseModel<string>>> CreateAdmin([FromBody] AdminRegistrationModel admin)
         {
             try
@@ -54,7 +54,7 @@ namespace InsuranceApp.cs.Controllers
             }
         }
 
-        [HttpPut("/update/{adminId}")]
+        [HttpPut("/admin_user/update/{adminId}")]
         public async Task<ResponseModel<string>> UpdateAdmin([FromBody] AdminUpdateModel adminModel, int adminId)
         {
             try
@@ -76,7 +76,7 @@ namespace InsuranceApp.cs.Controllers
             }
         }
 
-        [HttpDelete("/delete/{adminId}")]
+        [HttpDelete("/admin_user/delete/{adminId}")]
         public async Task<ResponseModel<string>> DeleteAdmin(int adminId)
         {
             try
@@ -98,7 +98,7 @@ namespace InsuranceApp.cs.Controllers
             }
         }
 
-        [HttpGet("/{adminId}")]
+        [HttpGet("/admin_user/{adminId}")]
         public async Task<ResponseModel<Admin>> GetAdminById(int adminId)
         {
             try
@@ -131,7 +131,7 @@ namespace InsuranceApp.cs.Controllers
             }
         }
 
-        [HttpGet("/admins")]
+        [HttpGet("/admin_user/admins")]
         public async Task<ResponseModel<IEnumerable<Admin>>> GetAllAdmins()
         {
             try
