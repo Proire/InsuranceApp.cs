@@ -9,7 +9,7 @@ namespace InsuranceAppRLL.Repositories.Interfaces.InsurancePlanRepository
 {
     public interface IInsurancePlanQueryRepository
     {
-        public Task<List<InsurancePlan>> getAllInsurancePlans();
-        public Task<InsurancePlan> getInsurancePlan(int planId);
+        public Task<List<InsurancePlan>> GetAllInsurancePlans();
+        public Task<InsurancePlan> GetInsurancePlan(int planId);
     }
 }

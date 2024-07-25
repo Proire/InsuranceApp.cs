@@ -9,7 +9,7 @@ namespace InsuranceAppRLL.Repositories.Interfaces.SchemeRepository
 {
     public interface ISchemeQueryRepository
     {
-        public Task<List<Scheme>> getAllSchemasForPlan(int planId);
-        public Task<Scheme> getScheme(int schemeId);
+        public Task<List<Scheme>> GetAllSchemasForPlan(int planId);
+        public Task<Scheme> GetScheme(int schemeId);
     }
 }
