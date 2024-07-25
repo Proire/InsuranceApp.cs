@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -25,6 +26,34 @@ namespace InsuranceAppRLL.Repositories.Implementations.AdminRepository
             _context = context;
             _rabbitMqService = rabbitMqService;
         }
+
+        public async Task DeleteAdminAsync(int adminId)
+        {
+            try
+            {
+                var admin = await _context.Admins.FindAsync(adminId);
+                if (admin != null)
+                {
+                    _context.Admins.Remove(admin);
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    throw new AdminException($"No admin found with id: {adminId}");
+                }
+            }
+            catch (DbUpdateException ex)
+            {
+                // Handle specific database update exceptions
+                throw new AdminException("An error occurred while deleting the admin from the database.", ex);
+            }
+            catch (Exception ex)
+            {
+                // Handle other exceptions
+                throw new AdminException("An unexpected error occurred.", ex);
+            }
+        }
+
 
         public async Task RegisterAdminAsync(Admin admin)
         {
@@ -72,5 +101,80 @@ namespace InsuranceAppRLL.Repositories.Implementations.AdminRepository
                 throw new AdminException("An unexpected error occurred.", ex);
             }
         }
+
+        public async Task UpdateAdminAsync(Admin admin)
+        {
+            try
+            {
+                var existingAdmin = await _context.Admins.FindAsync(admin.AdminID);
+                if (existingAdmin == null)
+                {
+                    throw new AdminException($"No admin found with id: {admin.AdminID}");
+                }
+
+                existingAdmin.Username = admin.Username;
+                existingAdmin.FullName = admin.FullName;
+
+                if(existingAdmin.Email != admin.Email)
+                {
+                    // Generate a unique key and IV for the admin
+                    using (var aes = System.Security.Cryptography.Aes.Create())
+                    {
+                        aes.GenerateKey();
+                        aes.GenerateIV();
+                        byte[] key = aes.Key;
+                        byte[] iv = aes.IV;
+
+                        // Store the key and IV in a file or secure storage
+                        KeyIvManager.SaveKeyAndIv(admin.Email, key, iv);
+
+
+                        // Hash the admin's password using the generated key and IV
+                        existingAdmin.Password = PasswordHasher.HashPassword(admin.Password, key, iv);
+                        existingAdmin.Email = admin.Email;  
+                    }
+                }
+
+                if (existingAdmin.Password != admin.Password)
+                {
+
+                    // Generate a unique key and IV for the user
+                    using (Aes aes = Aes.Create())
+                    {
+                        aes.GenerateKey();
+                        aes.GenerateIV();
+                        byte[] key = aes.Key;
+                        byte[] iv = aes.IV;
+
+
+                        // Store the key and IV in a file
+                        KeyIvManager.UpdateKeyAndIv(admin.Email, key, iv);
+
+                        // Hash the user's password using the generated key and IV
+                        existingAdmin.Password = PasswordHasher.HashPassword(admin.Password, key, iv);
+
+                    }
+                }
+
+                _context.Admins.Update(existingAdmin);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                // Handle concurrency conflicts
+                throw new AdminException("A concurrency conflict occurred while updating the admin.", ex);
+            }
+            catch (DbUpdateException ex)
+            {
+                // Handle specific database update exceptions
+                throw new AdminException("An error occurred while updating the admin in the database.", ex);
+            }
+            catch (Exception ex)
+            {
+                // Handle other exceptions
+                throw new AdminException("An unexpected error occurred.", ex);
+            }
+        }
+
     }
 }

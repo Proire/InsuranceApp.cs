@@ -62,7 +62,108 @@ namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
             catch (DbUpdateException ex)
             {
                 // Handle specific database update exceptions
-                Console.Write(ex.Message);
+                throw new CustomerException("An error occurred while registering the customer.", ex);
+            }
+            catch (Exception ex)
+            {
+                // Handle other exceptions
+                throw new CustomerException("An unexpected error occurred.", ex);
+            }
+        }
+
+        public async Task UpdateCustomerAsync(Customer customer)
+        {
+            try
+            {
+                // Find the existing customer
+                var existingCustomer = await _context.Customers.FindAsync(customer.CustomerID);
+                if (existingCustomer == null)
+                {
+                    throw new CustomerException($"No customer found with id: {customer.CustomerID}");
+                }
+
+                // Update customer details
+                existingCustomer.FullName = customer.FullName;
+                existingCustomer.Phone = customer.Phone;
+                existingCustomer.DateOfBirth = customer.DateOfBirth;
+
+                // Check if email has changed
+                if (existingCustomer.Email != customer.Email)
+                {
+                    // Generate and store new key and IV
+                    using (var aes = System.Security.Cryptography.Aes.Create())
+                    {
+                        aes.GenerateKey();
+                        aes.GenerateIV();
+                        byte[] key = aes.Key;
+                        byte[] iv = aes.IV;
+
+                        KeyIvManager.SaveKeyAndIv(customer.Email, key, iv);
+
+                        // Hash the new password
+                        existingCustomer.Password = PasswordHasher.HashPassword(customer.Password, key, iv);
+                        existingCustomer.Email = customer.Email;
+                    }
+                }
+                else if (existingCustomer.Password != customer.Password)
+                {
+                    // Generate and store new key and IV for password change
+                    using (var aes = System.Security.Cryptography.Aes.Create())
+                    {
+                        aes.GenerateKey();
+                        aes.GenerateIV();
+                        byte[] key = aes.Key;
+                        byte[] iv = aes.IV;
+
+                        KeyIvManager.UpdateKeyAndIv(customer.Email, key, iv);
+
+                        // Hash the new password
+                        existingCustomer.Password = PasswordHasher.HashPassword(customer.Password, key, iv);
+                    }
+                }
+
+                // Update customer in the context
+                _context.Customers.Update(existingCustomer);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                // Handle concurrency conflicts
+                throw new CustomerException("A concurrency conflict occurred while updating the customer.", ex);
+            }
+            catch (DbUpdateException ex)
+            {
+                // Handle specific database update exceptions
+                throw new CustomerException("An error occurred while updating the customer in the database.", ex);
+            }
+            catch (Exception ex)
+            {
+                // Handle other exceptions
+                throw new CustomerException("An unexpected error occurred.", ex);
+            }
+        }
+
+        public async Task DeleteCustomerAsync(int customerId)
+        {
+            try
+            {
+                // Find the existing customer
+                var customer = await _context.Customers.FindAsync(customerId);
+                if (customer != null)
+                {
+                    // Remove the customer
+                    _context.Customers.Remove(customer);
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    throw new CustomerException($"No customer found with id: {customerId}");
+                }
+            }
+            catch (DbUpdateException ex)
+            {
+                // Handle specific database update exceptions
+                throw new CustomerException("An error occurred while deleting the customer from the database.", ex);
             }
             catch (Exception ex)
             {

@@ -4,7 +4,6 @@ using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace UserRLL.Utilities
 {
@@ -33,13 +32,37 @@ namespace UserRLL.Utilities
             return GenerateToken(claims, tokenExpiry);
         }
 
-        public string GenerateUserToken(string userId, string userName, TimeSpan tokenExpiry)
+        public string GenerateCustomerToken(string userId, string userName, TimeSpan tokenExpiry)
         {
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, Convert.ToString(userId)),
                 new Claim(ClaimTypes.Name, userName),
-                new Claim(ClaimTypes.Role, "User")
+                new Claim(ClaimTypes.Role, "Customer")
+            };
+
+            return GenerateToken(claims, tokenExpiry);
+        }
+
+        public string GenerateInsuranceAgentToken(string userId, string userName, TimeSpan tokenExpiry)
+        {
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, Convert.ToString(userId)),
+                new Claim(ClaimTypes.Name, userName),
+                new Claim(ClaimTypes.Role, "InsuranceAgent")
+            };
+
+            return GenerateToken(claims, tokenExpiry);
+        }
+
+        public string GenerateEmployeeToken(string userId, string userName, TimeSpan tokenExpiry)
+        {
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, Convert.ToString(userId)),
+                new Claim(ClaimTypes.Name, userName),
+                new Claim(ClaimTypes.Role, "Employee")
             };
 
             return GenerateToken(claims, tokenExpiry);

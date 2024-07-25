@@ -30,9 +30,10 @@ namespace InsuranceMLL.EmployeeModels
         [DefaultValue("EmployeePass123!")]
         public string Password { get; set; } = "EmployeePass123!";
 
-        [Required(ErrorMessage = "Role is required.")]
-        [RegularExpression(@"^[a-zA-Z\s]{2,50}$", ErrorMessage = "Role must be between 2 and 50 characters long and contain only letters and spaces.")]
-        [DefaultValue("Staff")]
-        public string Role { get; set; } = "Staff";
+        [Required]
+        [StringLength(50)]
+        [RegularExpression(@"^Scheme Manager$", ErrorMessage = "Role must be 'Scheme Manager'")]
+        [DefaultValue("Scheme Manager")]
+        public string Role { get; set; } = string.Empty;
     }
 }

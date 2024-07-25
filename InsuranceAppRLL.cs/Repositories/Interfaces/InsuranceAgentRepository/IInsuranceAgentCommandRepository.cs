@@ -10,5 +10,9 @@ namespace InsuranceAppRLL.Repositories.Interfaces.InsuranceAgentRepository
     public interface IInsuranceAgentCommandRepository
     {
         Task RegisterInsuranceAgentAsync(InsuranceAgent insuranceAgent);
+
+        Task UpdateAgentAsync(InsuranceAgent agent);
+
+        Task DeleteAgentAsync(int agentId);
     }
 }

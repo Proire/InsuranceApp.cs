@@ -14,7 +14,8 @@ namespace InsuranceAppRLL.CQRS.Commands.EmployeeCommands
         public string Password { get; set; }
         public string Email { get; set; }
         public string FullName { get; set; }
-        public string Role { get; set; }
+
+        public string Role { get; set; }    
 
         public InsertEmployeeCommand(string username, string password, string email, string fullName, string role)
         {
@@ -22,7 +23,7 @@ namespace InsuranceAppRLL.CQRS.Commands.EmployeeCommands
             Password = password;
             Email = email;
             FullName = fullName;
-            Role = role;
+            Role = role;    
         }
     }
 }

@@ -1,5 +1,5 @@
-﻿using InsuranceMLL.CustomerModels;
-using InsuranceMLL.CustomerModels.InsuranceMLL.CustomerModels;
+﻿using InsuranceAppRLL.Entities;
+using InsuranceMLL.CustomerModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,5 +11,15 @@ namespace InsuranceAppBLL.CustomerService
     public interface ICustomerService
     {
         Task RegisterCustomerAsync(CustomerRegistrationModel customer);
+
+        Task<IEnumerable<Customer>> GetCustomers(int agentId);
+
+        Task DeleteCustomerAsync(int customerId);
+
+        Task UpdateCustomerAsync(CustomerUpdateModel customer, int customerId);
+
+        Task<IEnumerable<Customer>> GetAllCustomersAsync();
+
+        Task<Customer> GetCustomerByIdAsync(int customerId);
     }
 }

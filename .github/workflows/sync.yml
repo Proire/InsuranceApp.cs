@@ -1,0 +1,32 @@
+name: Sync Repository
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Runs every hour
+  push:
+    branches:
+      - '*'  # Run on push to any branch
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Git
+      run: |
+        git config --global user.email "you@example.com"
+        git config --global user.name "Your Name"
+
+    - name: Fetch all branches
+      run: git fetch --all
+
+    - name: Pull and push all branches
+      run: |
+        for branch in $(git for-each-ref --format='%(refname:short)' refs/heads/); do
+          git checkout $branch
+          git pull origin $branch
+          git push origin $branch || true  # Ignore error if there are no changes to commit
+        done

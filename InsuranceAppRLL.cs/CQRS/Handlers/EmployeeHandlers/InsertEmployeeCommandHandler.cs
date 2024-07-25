@@ -33,8 +33,8 @@ namespace InsuranceAppRLL.CQRS.Handlers.EmployeeHandlers
                 Password = request.Password,
                 Email = request.Email,
                 FullName = request.FullName,
-                Role = request.Role,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                Role = request.Role
             };
 
             await _repository.RegisterEmployeeAsync(employee);

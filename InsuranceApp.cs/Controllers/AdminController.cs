@@ -1,8 +1,10 @@
 ﻿using InsuranceAppBLL.AdminService;
 using InsuranceAppRLL.Entities;
 using InsuranceMLL.AdminModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
 using UserModelLayer;
 
@@ -22,8 +24,8 @@ namespace InsuranceApp.cs.Controllers
         }
 
         [HttpPost]
-        [Route("register")]
-        public async Task<ActionResult<ResponseModel<Admin>>> CreateAdmin([FromBody] AdminRegistrationModel admin)
+        [Route("/admin_user/register")]
+        public async Task<ActionResult<ResponseModel<string>>> CreateAdmin([FromBody] AdminRegistrationModel admin)
         {
             try
             {
@@ -33,7 +35,7 @@ namespace InsuranceApp.cs.Controllers
                 _logger.LogInformation($"Admin {admin.Email} registered.");
 
                 // Prepare and return the response model
-                var responseModel = new ResponseModel<Admin>
+                var responseModel = new ResponseModel<string>
                 {
                     Message = "Admin Added Successfully",
                     Status = true
@@ -43,7 +45,7 @@ namespace InsuranceApp.cs.Controllers
             catch (Exception ex)
             {
                 // Handle the exception and prepare the response model
-                var responseModel = new ResponseModel<Admin>
+                var responseModel = new ResponseModel<string>
                 {
                     Message = ex.Message,
                     Status = false
@@ -52,36 +54,104 @@ namespace InsuranceApp.cs.Controllers
             }
         }
 
-        [HttpPost]
-        [Route("login")]
-        public async Task<ActionResult<ResponseModel<string>>> LoginAsync([FromBody] LoginModel model)
+        [HttpPut("/admin_user/update/{adminId}")]
+        public async Task<ResponseModel<string>> UpdateAdmin([FromBody] AdminUpdateModel adminModel, int adminId)
         {
             try
             {
-                // Call the asynchronous Login method from the business logic layer (BLL)
-                string token = await _adminService.LoginAdminAsync(model);
-
-                // Prepare the response model with user data
-                var responseModel = new ResponseModel<string>
+                await _adminService.UpdateAdminAsync(adminModel, adminId);
+                return new ResponseModel<string>
                 {
-                    Message = "Admin Logged In Successfully!",
-                    Data = token, // Return the token
+                    Message = "Admin updated successfully",
                     Status = true
                 };
-
-                return Ok(responseModel);
             }
             catch (Exception ex)
             {
-                // Handle the exception and prepare the response model
-                var responseModel = new ResponseModel<string>
+                return new ResponseModel<string>
                 {
                     Message = ex.Message,
-                    Data = "Try Again",
                     Status = false
                 };
+            }
+        }
 
-                return BadRequest(responseModel);
+        [HttpDelete("/admin_user/delete/{adminId}")]
+        public async Task<ResponseModel<string>> DeleteAdmin(int adminId)
+        {
+            try
+            {
+                await _adminService.DeleteAdminAsync(adminId);
+                return new ResponseModel<string>
+                {
+                    Message = "Admin deleted successfully",
+                    Status = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseModel<string>
+                {
+                    Message = ex.Message,
+                    Status = false
+                };
+            }
+        }
+
+        [HttpGet("/admin_user/{adminId}")]
+        public async Task<ResponseModel<Admin>> GetAdminById(int adminId)
+        {
+            try
+            {
+                var admin = await _adminService.GetAdminByIdAsync(adminId);
+                if (admin == null)
+                {
+                    return new ResponseModel<Admin>
+                    {
+                        Data = new Admin(),
+                        Message = $"No admin found with id: {adminId}",
+                        Status = false
+                    };
+                }
+                return new ResponseModel<Admin>
+                {
+                    Data = admin,
+                    Message = "Admin retrieved successfully",
+                    Status = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseModel<Admin>
+                {
+                    Data = new Admin(),
+                    Message = ex.Message,
+                    Status = false
+                };
+            }
+        }
+
+        [HttpGet("/admin_user/admins")]
+        public async Task<ResponseModel<IEnumerable<Admin>>> GetAllAdmins()
+        {
+            try
+            {
+                var admins = await _adminService.GetAllAdminsAsync();
+                return new ResponseModel<IEnumerable<Admin>>
+                {
+                    Data = admins,
+                    Message = "Admins retrieved successfully",
+                    Status = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseModel<IEnumerable<Admin>>
+                {
+                    Data = new List<Admin>(),
+                    Message = ex.Message,
+                    Status = false
+                };
             }
         }
     }

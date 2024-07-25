@@ -1,63 +1,56 @@
-﻿using BookStoreRL.Utilities;
-using InsuranceAppRLL.CustomExceptions;
+﻿using InsuranceAppRLL.CustomExceptions;
 using InsuranceAppRLL.Entities;
 using InsuranceAppRLL.Repositories.Interfaces.AdminRepository;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using UserModelLayer;
-using UserRLL.Utilities;
 
 namespace InsuranceAppRLL.Repositories.Implementations.AdminRepository
 {
     public class AdminQueryRepository : IAdminQueryRepository
     {
         private readonly InsuranceDbContext _context;
-        private readonly JwtTokenGenerator _jwtTokenGenerator;
-
-        public AdminQueryRepository(InsuranceDbContext context, JwtTokenGenerator jwtTokenGenerator)
-        {
+        public AdminQueryRepository(InsuranceDbContext context) 
+        { 
             _context = context;
-            _jwtTokenGenerator = jwtTokenGenerator;
         }
 
-        public async Task<string> LoginAdminAsync(LoginModel model)
+        public async Task<Admin> GetAdminByIdAsync(int adminId)
         {
-            // Check if the admin exists asynchronously
-            bool isAdmin = await _context.Admins.AnyAsync(x => x.Email == model.Email);
-
-            if (isAdmin)
+            try
             {
-                // Retrieve the admin asynchronously
-                Admin? admin = await _context.Admins.FirstOrDefaultAsync(x => x.Email == model.Email);
-
-                if (admin != null)
+                var book = await _context.Admins.FindAsync(adminId);
+                if (book == null)
                 {
-                    // Retrieve the key and IV for the admin
-                    (byte[] key, byte[] iv) = KeyIvManager.GetKeyAndIv(admin.Email);
-
-                    // Verify the password
-                    byte[] cipheredPassword = Convert.FromBase64String(admin.Password);
-                    string decryptedPassword = PasswordHasher.VerifyPassword(cipheredPassword, key, iv);
-
-                    if (model.Password == decryptedPassword)
-                    {
-                        // Generate a token for the admin
-                        string token = _jwtTokenGenerator.GenerateAdminToken(Convert.ToString(admin.AdminID), admin.Username, TimeSpan.FromMinutes(15));
-
-                        return token;
-                    }
-
-                    throw new AdminException("Wrong Password, Reenter Password");
+                    throw new AdminException($"No Admin found with id: {adminId}");
                 }
-
-                throw new AdminException("Invalid Email, Register First");
+                return book;
             }
+            catch (Exception ex)
+            {
+                throw new AdminException("An error occurred while retrieving the Admin.", ex);
+            }
+        }
 
-            throw new AdminException("Invalid Email, Register First");
+        public async Task<IEnumerable<Admin>> GetAllAdminsAsync()
+        {
+            try
+            {
+                var books = await _context.Admins.ToListAsync();
+                if (books.Count == 0)
+                {
+                    throw new AdminException("No Admins found.");
+                }
+                return books;
+            }
+            catch (Exception ex)
+            {
+                throw new AdminException("An error occurred while retrieving the Admins.", ex);
+            }
         }
     }
 }
