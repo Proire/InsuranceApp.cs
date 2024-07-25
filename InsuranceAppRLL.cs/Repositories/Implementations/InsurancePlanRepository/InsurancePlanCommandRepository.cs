@@ -64,5 +64,32 @@ namespace InsuranceAppRLL.Repositories.Implementations.InsurancePlanRepository
                 }
             }
         }
+
+        public async Task UpdatePlan(InsurancePlan plan)
+        {
+            using (var transaction = _context.Database.BeginTransaction())
+            {
+                try
+                {
+                    var plancheck = await _context.InsurancePlans.FindAsync(plan.PlanID);
+                    if (plancheck == null)
+                    {
+                        throw new InsurancePlanException("Plan with the specified Id does not Exists");
+                    }
+                    if (plancheck.PlanName.Equals(plan.PlanName))
+                    {
+                        throw new InsurancePlanException("Plan with the specified Name already Exists");
+                    }
+                    _context.InsurancePlans.Update(plan);
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                }
+                catch (SqlException ex)
+                {
+                    transaction.Rollback();
+                    throw ex;
+                }
+            }
+        }
     }
 }

@@ -21,7 +21,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.InsurancePlanRepository
             _context = context;
         }
 
-        public async Task<List<InsurancePlan>> getAllInsurancePlans()
+        public async Task<IList<InsurancePlan>> getAllInsurancePlans()
         {
             try
             {

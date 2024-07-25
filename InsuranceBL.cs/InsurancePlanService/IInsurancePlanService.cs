@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace InsuranceAppRLL.Repositories.Interfaces.SchemeRepository
+namespace InsuranceAppBLL.InsurancePlanService
 {
-    public interface ISchemeCommandRepository
+    public interface IInsurancePlanService
     {
     }
 }
