@@ -20,7 +20,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.PolicyRepository
             _context = context;
         }
 
-        public async Task<List<Policy>> getAllPoliciesForCustomer(int customerId)
+        public async Task<List<Policy>> GetAllPoliciesForCustomer(int customerId)
         {
             try
             {
@@ -37,7 +37,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.PolicyRepository
             }
         }
 
-        public async Task<Policy> getPolicy(int policyId)
+        public async Task<Policy> GetPolicy(int policyId)
         {
             try
             {
