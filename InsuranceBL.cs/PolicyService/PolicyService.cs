@@ -1,5 +1,8 @@
-﻿using InsuranceAppRLL.CQRS.Queries.PolicyQueries;
+﻿using InsuranceAppRLL.CQRS.Commands.PolicyCommands.InsuranceAppBLL.Commands;
+using InsuranceAppRLL.CQRS.Commands.PolicyCommands;
+using InsuranceAppRLL.CQRS.Queries.PolicyQueries;
 using InsuranceAppRLL.Entities;
+using InsuranceMLL.PolicyModels;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -26,6 +29,44 @@ namespace InsuranceAppBLL.PolicyService
         public async Task<Policy> GetPolicyByIdAsync(int policyId)
         {
             return await _mediator.Send(new GetPolicyByIdQuery(policyId));
+        }
+        public async Task CreatePolicyAsync(PolicyRegistrationModel policyModel)
+        {
+            var command = new InsertPolicyCommand
+            (
+               policyModel.CustomerID,
+               policyModel.SchemeID,
+               policyModel.PolicyDetails,
+               policyModel.Premium,
+               policyModel.DateIssued,
+               policyModel.MaturityPeriod,
+               policyModel.PolicyLapseDate
+            );
+
+            await _mediator.Send(command);
+        }
+
+        public async Task UpdatePolicyAsync(PolicyUpdateModel updatePolicyModel, int policyId)
+        {
+            var command = new UpdatePolicyCommand(
+                policyId,
+                updatePolicyModel.CustomerID,
+                updatePolicyModel.SchemeID,
+                updatePolicyModel.PolicyDetails,
+                updatePolicyModel.Premium,
+                updatePolicyModel.DateIssued,
+                updatePolicyModel.MaturityPeriod,
+                updatePolicyModel.PolicyLapseDate
+            );
+
+            await _mediator.Send(command);
+        }
+
+        public async Task DeletePolicyAsync(int policyId)
+        {
+            var command = new DeletePolicyCommand(policyId);
+           
+            await _mediator.Send(command);
         }
     }
 }

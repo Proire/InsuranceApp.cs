@@ -24,7 +24,7 @@ namespace InsuranceApp.Controllers
         }
 
         [HttpPost]
-        [Route("register")]
+        [Route("/customer_user/register")]
         public async Task<ActionResult<ResponseModel<Customer>>> CreateCustomer([FromBody] CustomerRegistrationModel customer)
         {
             try
@@ -55,7 +55,7 @@ namespace InsuranceApp.Controllers
         }
 
         [HttpGet]
-        [Route("/agent/customers/{agentId}")]
+        [Route("/customer_user/agent/customers/{agentId}")]
         public async Task<ResponseModel<IEnumerable<Customer>>> GetCustomersByAgentIdAsync(int agentId)
         {
             try
@@ -100,7 +100,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        [HttpPut("{customerId}")]
+        [HttpPut("/customer_user/{customerId}")]
         public async Task<ActionResult<ResponseModel<string>>> UpdateCustomer([FromBody] CustomerUpdateModel customerUpdateModel, int customerId)
         {
             try

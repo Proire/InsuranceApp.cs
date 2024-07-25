@@ -17,5 +17,7 @@ namespace InsuranceAppBLL.InsurancePlanService
         Task<IEnumerable<InsurancePlan>> GetAllInsurancePlansAsync();
 
         Task<InsurancePlan> GetInsurancePlanByIdAsync(int planId);
+
+        Task UpdateInsurancePlanAsync(UpdateInsurancePlanModel insurancePlan, int planId);
     }
 }

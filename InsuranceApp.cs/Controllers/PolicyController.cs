@@ -1,6 +1,7 @@
 ﻿using InsuranceAppBLL.PolicyService;
 using InsuranceAppRLL.CustomExceptions;
 using InsuranceAppRLL.Entities;
+using InsuranceMLL.PolicyModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using UserModelLayer;
@@ -96,6 +97,89 @@ namespace InsuranceApp.Controllers
                 return new ResponseModel<Policy>
                 {
                     Data = new Policy(),
+                    Message = ex.Message,
+                    Status = false
+                };
+            }
+        }
+
+        [HttpPost]
+        [Route("register")]
+        public async Task<ActionResult<ResponseModel<string>>> CreatePolicy([FromBody] PolicyRegistrationModel policyModel)
+        {
+            try
+            {
+                await _policyService.CreatePolicyAsync(policyModel);
+
+                // Log the creation event
+                _logger.LogInformation($"Policy for customer {policyModel.CustomerID} created.");
+
+                // Prepare and return the response model
+                var responseModel = new ResponseModel<string>
+                {
+                    Message = "Policy Created Successfully",
+                    Status = true
+                };
+                return Ok(responseModel);
+            }
+            catch (Exception ex)
+            {
+                // Handle the exception and prepare the response model
+                var responseModel = new ResponseModel<string>
+                {
+                    Message = ex.Message,
+                    Status = false
+                };
+                return BadRequest(responseModel);
+            }
+        }
+
+        [HttpPut("/update/{policyId}")]
+        public async Task<ActionResult<ResponseModel<string>>> UpdatePolicy([FromBody] PolicyUpdateModel updatePolicyModel, int policyId)
+        {
+            try
+            {
+                await _policyService.UpdatePolicyAsync(updatePolicyModel, policyId);
+
+                // Log the update event
+                _logger.LogInformation($"Policy {policyId} updated.");
+
+                return new ResponseModel<string>
+                {
+                    Message = "Policy updated successfully",
+                    Status = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseModel<string>
+                {
+                    Message = ex.Message,
+                    Status = false
+                };
+            }
+        }
+
+        [HttpDelete("/delete/{policyId}")]
+        public async Task<ActionResult<ResponseModel<string>>> DeletePolicy(int policyId)
+        {
+            try
+            {
+                await _policyService.DeletePolicyAsync(policyId);
+
+                // Log the deletion event
+                _logger.LogInformation($"Policy {policyId} deleted.");
+
+                return new ResponseModel<string>
+                {
+                    Message = "Policy deleted successfully",
+                    Status = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseModel<string>
+                {
                     Message = ex.Message,
                     Status = false
                 };

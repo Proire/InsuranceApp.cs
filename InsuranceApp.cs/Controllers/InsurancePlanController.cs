@@ -129,5 +129,28 @@ namespace InsuranceApp.Controllers
                 };
             }
         }
+
+        [HttpPut("/updateInsurancePlan/{planId}")]
+        public async Task<ResponseModel<string>> UpdateInsurancePlan([FromBody] UpdateInsurancePlanModel insurancePlanModel, int planId)
+        {
+            try
+            {
+                await _insurancePlanService.UpdateInsurancePlanAsync(insurancePlanModel, planId);
+                return new ResponseModel<string>
+                {
+                    Message = "Insurance Plan updated successfully",
+                    Status = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseModel<string>
+                {
+                    Message = ex.Message,
+                    Status = false
+                };
+            }
+        }
+
     }
 }

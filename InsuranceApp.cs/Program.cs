@@ -4,6 +4,8 @@ using InsuranceAppBLL.EmployeeService;
 using InsuranceAppBLL.InsuranceAgentService;
 using InsuranceAppBLL.InsurancePlanService;
 using InsuranceAppBLL.LoginService;
+using InsuranceAppBLL.PolicyService;
+using InsuranceAppBLL.SchemeService;
 using InsuranceAppRLL;
 using InsuranceAppRLL.CQRS.Handlers.AdminHandlers;
 using InsuranceAppRLL.Entities;
@@ -13,12 +15,16 @@ using InsuranceAppRLL.Repositories.Implementations.CustomerRepository;
 using InsuranceAppRLL.Repositories.Implementations.EmployeeRepository;
 using InsuranceAppRLL.Repositories.Implementations.InsuranceAgentRepository;
 using InsuranceAppRLL.Repositories.Implementations.InsurancePlanRepository;
+using InsuranceAppRLL.Repositories.Implementations.PolicyRepository;
+using InsuranceAppRLL.Repositories.Implementations.SchemeRepository;
 using InsuranceAppRLL.Repositories.Interfaces;
 using InsuranceAppRLL.Repositories.Interfaces.AdminRepository;
 using InsuranceAppRLL.Repositories.Interfaces.CustomerRepository;
 using InsuranceAppRLL.Repositories.Interfaces.EmployeeRepository;
 using InsuranceAppRLL.Repositories.Interfaces.InsuranceAgentRepository;
 using InsuranceAppRLL.Repositories.Interfaces.InsurancePlanRepository;
+using InsuranceAppRLL.Repositories.Interfaces.PolicyRepository;
+using InsuranceAppRLL.Repositories.Interfaces.SchemeRepository;
 using InsuranceAppRLL.Utilities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -72,13 +78,21 @@ namespace InsuranceApp.cs
             builder.Services.AddScoped<IInsurancePlanCommandRepository, InsurancePlanCommandRepository>();
             builder.Services.AddScoped<IInsurancePlanQueryRepository, InsurancePlanQueryRepository>();
 
+            builder.Services.AddScoped<IPolicyCommandRepository, PolicyCommandRepository>();
+            builder.Services.AddScoped<IPolicyQueryRepository, PolicyQueryRepository>();
+
+            builder.Services.AddScoped<ISchemeCommandRepository, SchemeCommandRepository>();
+            builder.Services.AddScoped<ISchemeQueryRepository, SchemeQueryRepository>();    
+
             // Business layer services
             builder.Services.AddScoped<IAdminService,AdminService>();
             builder.Services.AddScoped<IEmployeeService, EmployeeService>(); 
             builder.Services.AddScoped<ICustomerService, CustomerService>();
             builder.Services.AddScoped<IInsuranceAgentService, InsuranceAgentService>();   
             builder.Services.AddScoped<IInsurancePlanService, InsurancePlanService>();  
-            builder.Services.AddScoped<ILoginService, LoginService>();  
+            builder.Services.AddScoped<ILoginService, LoginService>(); 
+            builder.Services.AddScoped<ISchemeService, SchemeService>();
+            builder.Services.AddScoped<IPolicyService, PolicyService>();
 
             // Mediator service
             builder.Services.AddMediatR(typeof(Program).Assembly);

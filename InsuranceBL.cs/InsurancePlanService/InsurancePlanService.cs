@@ -40,5 +40,11 @@ namespace InsuranceAppBLL.InsurancePlanService
         {
             return await _mediator.Send(new GetInsurancePlanByIdQuery(planId));
         }
+
+        public async Task UpdateInsurancePlanAsync(UpdateInsurancePlanModel insurancePlan, int planId)
+        {
+            var UpdateInsurancePlanCommand = new UpdateInsurancePlanCommand(planId, insurancePlan.PlanName,insurancePlan.PlanDetails);
+            await _mediator.Send(UpdateInsurancePlanCommand);
+        }
     }
 }
