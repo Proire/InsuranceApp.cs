@@ -91,6 +91,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
                 {
                     _context.Employees.Remove(employee);
                     await _context.SaveChangesAsync();
+                    KeyIvManager.DeleteKeyAndIv(employee.Email);
                 }
                 else
                 {
@@ -117,16 +118,15 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
         {
             try
             {
-                if (await _context.Employees.AnyAsync(e => e.Email == employee.Email))
-                {
-                    throw new EmployeeException("An employee with this email already exists.");
-                }
-
 
                 var existingEmployee = await _context.Employees.FindAsync(employee.EmployeeID);
                 if (existingEmployee == null)
                 {
                     throw new EmployeeException($"No employee found with id: {employee.EmployeeID}");
+                }
+                if (await _context.Employees.AnyAsync(e => e.EmployeeID != employee.EmployeeID && e.Email == employee.Email))
+                {
+                    throw new EmployeeException("An employee with this email already exists.");
                 }
 
                 existingEmployee.Username = employee.Username;

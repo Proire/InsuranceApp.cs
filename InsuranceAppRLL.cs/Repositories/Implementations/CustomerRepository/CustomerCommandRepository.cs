@@ -80,16 +80,17 @@ namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
         {
             try
             {
-                if (await _context.Customers.AnyAsync(c => c.Email == customer.Email))
-                {
-                    throw new CustomerException("A customer with this email already exists.");
-                }
+               
 
                 // Find the existing customer
                 var existingCustomer = await _context.Customers.FindAsync(customer.CustomerID);
                 if (existingCustomer == null)
                 {
                     throw new CustomerException($"No customer found with id: {customer.CustomerID}");
+                }
+                if (await _context.Customers.AnyAsync(c => c.CustomerID != customer.CustomerID && c.Email == customer.Email))
+                {
+                    throw new CustomerException("A customer with this email already exists.");
                 }
 
                 // Update customer details
@@ -175,6 +176,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
                     // Remove the customer
                     _context.Customers.Remove(customer);
                     await _context.SaveChangesAsync();
+                    KeyIvManager.DeleteKeyAndIv(customer.Email);
                 }
                 else
                 {

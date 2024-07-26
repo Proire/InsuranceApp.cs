@@ -4,6 +4,7 @@ using InsuranceAppRLL.Entities;
 using InsuranceAppRLL.Repositories.Interfaces.AdminRepository;
 using InsuranceAppRLL.Utilities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,6 +37,8 @@ namespace InsuranceAppRLL.Repositories.Implementations.AdminRepository
                 {
                     _context.Admins.Remove(admin);
                     await _context.SaveChangesAsync();
+                    // Store the key and IV in a file or secure storage
+                    KeyIvManager.DeleteKeyAndIv(admin.Email);
                 }
                 else
                 {
@@ -113,17 +116,18 @@ namespace InsuranceAppRLL.Repositories.Implementations.AdminRepository
         {
             try
             {
-                // Check if an admin with the same email already exists
-                if (await _context.Admins.AnyAsync(a => a.Email == admin.Email))
-                {
-                    throw new AdminException("An admin with this email already exists.");
-                }
-
+                
                 var existingAdmin = await _context.Admins.FindAsync(admin.AdminID);
                 if (existingAdmin == null)
                 {
                     throw new AdminException($"No admin found with id: {admin.AdminID}");
                 }
+                // Check if an admin with the same email already exists
+                if (await _context.Admins.AnyAsync(a => a.AdminID != admin.AdminID && a.Email == admin.Email))
+                {
+                    throw new AdminException("An admin with this email already exists.");
+                }
+
 
                 existingAdmin.Username = admin.Username;
                 existingAdmin.FullName = admin.FullName;

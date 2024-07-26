@@ -90,6 +90,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.InsuranceAgentRepository
                 {
                     _context.InsuranceAgents.Remove(agent);
                     await _context.SaveChangesAsync();
+                    KeyIvManager.DeleteKeyAndIv(agent.Email);
                 }
                 else
                 {
@@ -116,17 +117,18 @@ namespace InsuranceAppRLL.Repositories.Implementations.InsuranceAgentRepository
         {
             try
             {
-                if (await _context.InsuranceAgents.AnyAsync(a => a.Email == agent.Email))
-                {
-                    throw new InsuranceAgentException("An agent with this email already exists.");
-                }
-
+               
 
                 var existingAgent = await _context.InsuranceAgents.FindAsync(agent.AgentID);
                 if (existingAgent == null)
                 {
                     throw new InsuranceAgentException($"No agent found with id: {agent.AgentID}");
                 }
+                if (await _context.InsuranceAgents.AnyAsync(a => a.AgentID != agent.AgentID && a.Email == agent.Email))
+                {
+                    throw new InsuranceAgentException("An agent with this email already exists.");
+                }
+
 
                 existingAgent.Username = agent.Username;
                 existingAgent.FullName = agent.FullName;

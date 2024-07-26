@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
+using System.Security.Claims;
 using UserModelLayer;
 
 namespace InsuranceApp.cs.Controllers
@@ -54,11 +55,14 @@ namespace InsuranceApp.cs.Controllers
             }
         }
 
-        [HttpPut("admin_user/update/{adminId}")]
-        public async Task<ResponseModel<string>> UpdateAdmin([FromBody] AdminUpdateModel adminModel, int adminId)
+        [Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
+        [HttpPut("admin_user/update")]
+        public async Task<ResponseModel<string>> UpdateAdmin([FromBody] AdminUpdateModel adminModel)
         {
             try
             {
+                int adminId = Convert.ToInt32(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
                 await _adminService.UpdateAdminAsync(adminModel, adminId);
                 return new ResponseModel<string>
                 {
@@ -76,11 +80,14 @@ namespace InsuranceApp.cs.Controllers
             }
         }
 
-        [HttpDelete("admin_user/delete/{adminId}")]
-        public async Task<ResponseModel<string>> DeleteAdmin(int adminId)
+        [Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
+        [HttpDelete("admin_user/delete")]
+        public async Task<ResponseModel<string>> DeleteAdmin()
         {
             try
             {
+                int adminId = Convert.ToInt32(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
                 await _adminService.DeleteAdminAsync(adminId);
                 return new ResponseModel<string>
                 {
@@ -98,11 +105,14 @@ namespace InsuranceApp.cs.Controllers
             }
         }
 
-        [HttpGet("admin_user/{adminId}")]
-        public async Task<ResponseModel<Admin>> GetAdminById(int adminId)
+        [Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
+        [HttpGet("admin_user")]
+        public async Task<ResponseModel<Admin>> GetAdminById()
         {
             try
             {
+                int adminId = Convert.ToInt32(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
                 var admin = await _adminService.GetAdminByIdAsync(adminId);
                 return new ResponseModel<Admin>
                 {
@@ -121,6 +131,7 @@ namespace InsuranceApp.cs.Controllers
             }
         }
 
+        [Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
         [HttpGet("admin_user/admins")]
         public async Task<ResponseModel<IEnumerable<Admin>>> GetAllAdmins()
         {

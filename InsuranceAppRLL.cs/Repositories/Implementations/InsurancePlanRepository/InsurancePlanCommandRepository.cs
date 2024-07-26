@@ -80,7 +80,9 @@ namespace InsuranceAppRLL.Repositories.Implementations.InsurancePlanRepository
                     {
                         throw new InsurancePlanException("Plan with the specified Name already Exists");
                     }
-                    _context.InsurancePlans.Update(plan);
+                    plancheck.PlanName = plan.PlanName;
+                    plancheck.PlanDetails = plan.PlanDetails;   
+                    _context.InsurancePlans.Update(plancheck);
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
                 }
