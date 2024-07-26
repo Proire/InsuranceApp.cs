@@ -25,7 +25,10 @@ namespace InsuranceAppRLL.CQRS.Handlers.SchemeHandlers
             {
                 SchemeName = request.SchemeName,
                 SchemeDetails = request.SchemeDetails,
-                PlanID = request.PlanID
+                PlanID = request.PlanID,
+                SchemeCover = request.SchemeCover,
+                SchemeTenure = request.SchemeTenure,
+                SchemePrice = request.SchemePrice,  
             };
 
             await _schemeCommandRepository.AddScheme(scheme);

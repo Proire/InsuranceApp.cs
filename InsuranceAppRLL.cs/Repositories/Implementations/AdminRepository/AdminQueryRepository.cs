@@ -30,6 +30,11 @@ namespace InsuranceAppRLL.Repositories.Implementations.AdminRepository
                 }
                 return book;
             }
+            catch (AdminException)
+            {
+                // Rethrow the AdminException so that it is not caught by the generic catch block
+                throw;
+            }
             catch (Exception ex)
             {
                 throw new AdminException("An error occurred while retrieving the Admin.", ex);
@@ -46,6 +51,11 @@ namespace InsuranceAppRLL.Repositories.Implementations.AdminRepository
                     throw new AdminException("No Admins found.");
                 }
                 return books;
+            }
+            catch (AdminException)
+            {
+                // Rethrow the AdminException so that it is not caught by the generic catch block
+                throw;
             }
             catch (Exception ex)
             {

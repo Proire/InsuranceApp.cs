@@ -38,6 +38,6 @@ namespace InsuranceAppRLL.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation property - one Employee manages many schemes
-        public virtual ICollection<Scheme> Schemes { get; set; }
+        public virtual ICollection<EmployeeScheme> Schemes { get; set; }
     }
 }

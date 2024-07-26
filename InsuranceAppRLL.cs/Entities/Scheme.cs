@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace InsuranceAppRLL.Entities
 {
@@ -21,6 +22,16 @@ namespace InsuranceAppRLL.Entities
         [Required]
         public string SchemeDetails { get; set; } = string.Empty;
 
+        [Required]
+        public double SchemePrice { get; set; }
+
+        [Required]
+        public double SchemeCover { get; set; }
+
+        [Required]
+        public int SchemeTenure { get; set; }
+
+
         // foreign key - Plan ID
         [Required]
         public int PlanID { get; set; }
@@ -33,8 +44,9 @@ namespace InsuranceAppRLL.Entities
 
         // Navigation property - one Scheme have many policies 
         public virtual ICollection<Policy> Policies { get; set; }
-        
+
         // Navigation property - one Scheme managed by many employees
-        public virtual ICollection<Employee> Employees { get; set; }
+        [JsonIgnore]
+        public virtual ICollection<EmployeeScheme> Employees { get; set; }
     }
 }

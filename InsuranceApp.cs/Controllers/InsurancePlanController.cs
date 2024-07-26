@@ -1,15 +1,5 @@
-<<<<<<< HEAD
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 
-namespace InsuranceApp.Controllers
-{
-    [Route("InsuranceApp/InsurancePlan")]
-    [ApiController]
-    public class InsurancePlanController : ControllerBase
-    {
-=======
-﻿using InsuranceAppBLL.InsurancePlanService;
+using InsuranceAppBLL.InsurancePlanService;
 using InsuranceAppRLL.Entities;
 using InsuranceMLL.InsurancePlanModels;
 using Microsoft.AspNetCore.Http;
@@ -32,7 +22,7 @@ namespace InsuranceApp.Controllers
         }
 
         [HttpPost]
-        [Route("create")]
+        [Route("plan/create")]
         public async Task<ActionResult<ResponseModel<string>>> CreateInsurancePlan([FromBody] InsurancePlanCreationModel insurancePlan)
         {
             try
@@ -62,7 +52,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        [HttpDelete("/delete/{planId}")]
+        [HttpDelete("plan/delete/{planId}")]
         public async Task<ResponseModel<string>> DeleteInsurancePlan(int planId)
         {
             try
@@ -84,21 +74,12 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        [HttpGet("/{planId}")]
+        [HttpGet("plan/{planId}")]
         public async Task<ResponseModel<InsurancePlan>> GetInsurancePlanById(int planId)
         {
             try
             {
                 var insurancePlan = await _insurancePlanService.GetInsurancePlanByIdAsync(planId);
-                if (insurancePlan == null)
-                {
-                    return new ResponseModel<InsurancePlan>
-                    {
-                        Data = new InsurancePlan(),
-                        Message = $"No insurance plan found with id: {planId}",
-                        Status = false
-                    };
-                }
                 return new ResponseModel<InsurancePlan>
                 {
                     Data = insurancePlan,
@@ -110,14 +91,13 @@ namespace InsuranceApp.Controllers
             {
                 return new ResponseModel<InsurancePlan>
                 {
-                    Data = new InsurancePlan(),
                     Message = ex.Message,
                     Status = false
                 };
             }
         }
 
-        [HttpGet("/plans")]
+        [HttpGet("plan/plans")]
         public async Task<ResponseModel<IEnumerable<InsurancePlan>>> GetAllInsurancePlans()
         {
             try
@@ -134,14 +114,13 @@ namespace InsuranceApp.Controllers
             {
                 return new ResponseModel<IEnumerable<InsurancePlan>>
                 {
-                    Data = new List<InsurancePlan>(),
                     Message = ex.Message,
                     Status = false
                 };
             }
         }
 
-        [HttpPut("/updateInsurancePlan/{planId}")]
+        [HttpPut("plan/updateInsurancePlan/{planId}")]
         public async Task<ResponseModel<string>> UpdateInsurancePlan([FromBody] UpdateInsurancePlanModel insurancePlanModel, int planId)
         {
             try
@@ -162,7 +141,5 @@ namespace InsuranceApp.Controllers
                 };
             }
         }
-
->>>>>>> 934d4899729eba4fa6d9b04ca3e54115e79f8128
     }
 }

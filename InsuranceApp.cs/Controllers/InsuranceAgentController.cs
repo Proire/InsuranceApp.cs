@@ -2,7 +2,6 @@
 using InsuranceAppRLL.Entities;
 using InsuranceMLL.InsuranceAgentModels;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using UserModelLayer;
 
@@ -23,7 +22,7 @@ namespace InsuranceApp.Controllers
 
         [Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
         [HttpPost]
-        [Route("register")]
+        [Route("agent_user/register")]
         public async Task<ActionResult<ResponseModel<InsuranceAgent>>> CreateInsuranceAgent([FromBody] InsuranceAgentRegistrationModel agent)
         {
             try
@@ -53,7 +52,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        [HttpGet("/get/agents")]
+        [HttpGet("agent_user/agents")]
         public async Task<ResponseModel<IEnumerable<InsuranceAgent>>> GetAllInsuranceAgents()
         {
             try
@@ -70,28 +69,19 @@ namespace InsuranceApp.Controllers
             {
                 return new ResponseModel<IEnumerable<InsuranceAgent>>
                 {
-                    Data = null,
                     Message = ex.Message,
                     Status = false
                 };
             }
         }
 
-        [HttpGet("{agentId}")]
+        [HttpGet("agent_user/{agentId}")]
         public async Task<ResponseModel<InsuranceAgent>> GetAgentById(int agentId)
         {
             try
             {
                 var agent = await _insuranceAgentService.GetInsuranceAgentAsync(agentId);
-                if (agent == null)
-                {
-                    return new ResponseModel<InsuranceAgent>
-                    {
-                        Data = null,
-                        Message = $"No agent found with id: {agentId}",
-                        Status = false
-                    };
-                }
+               
                 return new ResponseModel<InsuranceAgent>
                 {
                     Data = agent,
@@ -110,7 +100,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        [HttpPut("/update/{agentId}")]
+        [HttpPut("agent_user/update/{agentId}")]
         public async Task<ResponseModel<string>> UpdateAgent([FromBody] AgentUpdateModel agentModel, int agentId)
         {
             try
@@ -132,7 +122,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        [HttpDelete("/delete/{agentId}")]
+        [HttpDelete("agent_user/delete/{agentId}")]
         public async Task<ResponseModel<string>> DeleteAgent(int agentId)
         {
             try

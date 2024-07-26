@@ -34,6 +34,10 @@ namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
                 }
                 return customer;
             }
+            catch (CustomerException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 throw new CustomerException("An error occurred while retrieving the customer.", ex);
@@ -50,6 +54,10 @@ namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
                     throw new CustomerException("No customers found.");
                 }
                 return customers;
+            }
+            catch (CustomerException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -70,6 +78,10 @@ namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
                 }
 
                 return customers;
+            }
+            catch (CustomerException)
+            {
+                throw;
             }
             catch (SqlException ex)
             {

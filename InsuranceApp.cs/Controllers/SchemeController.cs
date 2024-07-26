@@ -23,22 +23,12 @@ namespace InsuranceApp.Controllers
         }
 
         [HttpGet]
-        [Route("/plan/{planId}/schemes")]
+        [Route("plan/{planId}/schemes")]
         public async Task<ActionResult<ResponseModel<IEnumerable<Scheme>>>> GetAllSchemesByPlanIdAsync(int planId)
         {
             try
             {
                 var schemes = await _schemeService.GetAllSchemesForPlanAsync(planId);
-
-                if (schemes == null || !schemes.Any())
-                {
-                    return new ResponseModel<IEnumerable<Scheme>>
-                    {
-                        Data = new List<Scheme>(),
-                        Message = "No schemes found for the plan.",
-                        Status = false
-                    };
-                }
 
                 // Return the response model with success status
                 return new ResponseModel<IEnumerable<Scheme>>
@@ -52,7 +42,6 @@ namespace InsuranceApp.Controllers
             {
                 return new ResponseModel<IEnumerable<Scheme>>
                 {
-                    Data = new List<Scheme>(),
                     Message = ex.Message,
                     Status = false
                 };
@@ -61,28 +50,19 @@ namespace InsuranceApp.Controllers
             {
                 return new ResponseModel<IEnumerable<Scheme>>
                 {
-                    Data = new List<Scheme>(),
                     Message = "An unexpected error occurred. " + ex.Message,
                     Status = false
                 };
             }
         }
 
-        [HttpGet("{schemeId}")]
+        [HttpGet("plan/{schemeId}")]
         public async Task<ActionResult<ResponseModel<Scheme>>> GetSchemeByIdAsync(int schemeId)
         {
             try
             {
                 var scheme = await _schemeService.GetSchemeByIdAsync(schemeId);
-                if (scheme == null)
-                {
-                    return new ResponseModel<Scheme>
-                    {
-                        Data = new Scheme(),
-                        Message = $"No scheme found with id: {schemeId}",
-                        Status = false
-                    };
-                }
+               
                 return new ResponseModel<Scheme>
                 {
                     Data = scheme,
@@ -94,7 +74,6 @@ namespace InsuranceApp.Controllers
             {
                 return new ResponseModel<Scheme>
                 {
-                    Data = new Scheme(),
                     Message = ex.Message,
                     Status = false
                 };
@@ -103,7 +82,7 @@ namespace InsuranceApp.Controllers
 
         [Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
         [HttpPost]
-        [Route("create")]
+        [Route("plan/create")]
         public async Task<ActionResult<ResponseModel<Scheme>>> CreateScheme([FromBody] SchemeRegistrationModel schemeModel)
         {
             try
@@ -133,7 +112,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        [HttpPut("{schemeId}")]
+        [HttpPut("plan/{schemeId}")]
         public async Task<ActionResult<ResponseModel<string>>> UpdateScheme([FromBody] SchemeUpdateModel schemeModel, int schemeId)
         {
             try
@@ -163,7 +142,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        [HttpDelete("{schemeId}")]
+        [HttpDelete("plan/{schemeId}")]
         public async Task<ActionResult<ResponseModel<string>>> DeleteScheme(int schemeId)
         {
             try
