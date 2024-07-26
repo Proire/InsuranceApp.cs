@@ -3,5 +3,20 @@
     "Email": "admin@example.com",
     "Key": "94Bdm/P2Tu4aHfvjbI/r5/arpjJySj7IwCN1uhqJtRU=",
     "Iv": "P\u002BVWVcO5Em8g06J4PKB7/g=="
+  },
+  "naving@gmail.com": {
+    "Email": "naving@gmail.com",
+    "Key": "1wqtI\u002B/Jr0qIOF/5GJM\u002BoIKvkiL9YPJhHYzuUpO\u002Blzw=",
+    "Iv": "FRnbSkWr817E5gaCmo2jVg=="
+  },
+  "employee@example.com": {
+    "Email": "employee@example.com",
+    "Key": "bn7tIzJDN9GWyVLahKmL826uujqO1mzOo0F3ZzYPIUA=",
+    "Iv": "tigeT0Ul88MgeGvoeMTXiw=="
+  },
+  "emp@example.com": {
+    "Email": "emp@example.com",
+    "Key": "S9eXURI90Qh8\u002BCdNesPaMwLQHg45RM7pbFS2r\u002BoWias=",
+    "Iv": "\u002B47LnXXUGqClLQLMViRsHA=="
   }
 }
