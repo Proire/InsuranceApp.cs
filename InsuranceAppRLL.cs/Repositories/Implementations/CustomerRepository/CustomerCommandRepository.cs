@@ -27,24 +27,29 @@ namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
 
         public async Task RegisterCustomerAsync(Customer customer)
         {
-            string password = customer.Password;
-            // Generate a unique key and IV for the customer
-            using (var aes = System.Security.Cryptography.Aes.Create())
-            {
-                aes.GenerateKey();
-                aes.GenerateIV();
-                byte[] key = aes.Key;
-                byte[] iv = aes.IV;
-
-                // Store the key and IV in a file or secure storage
-                KeyIvManager.SaveKeyAndIv(customer.Email, key, iv);
-
-                // Hash the customer's password using the generated key and IV
-                customer.Password = PasswordHasher.HashPassword(customer.Password, key, iv);
-            }
-
             try
             {
+                if (await _context.Customers.AnyAsync(c => c.Email == customer.Email))
+                {
+                    throw new CustomerException("A customer with this email already exists.");
+                }
+
+                string password = customer.Password;
+                // Generate a unique key and IV for the customer
+                using (var aes = System.Security.Cryptography.Aes.Create())
+                {
+                    aes.GenerateKey();
+                    aes.GenerateIV();
+                    byte[] key = aes.Key;
+                    byte[] iv = aes.IV;
+
+                    // Store the key and IV in a file or secure storage
+                    KeyIvManager.SaveKeyAndIv(customer.Email, key, iv);
+
+                    // Hash the customer's password using the generated key and IV
+                    customer.Password = PasswordHasher.HashPassword(customer.Password, key, iv);
+                }
+
                 await _context.Customers.AddAsync(customer);
                 await _context.SaveChangesAsync();
 
@@ -75,6 +80,11 @@ namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
         {
             try
             {
+                if (await _context.Customers.AnyAsync(c => c.Email == customer.Email))
+                {
+                    throw new CustomerException("A customer with this email already exists.");
+                }
+
                 // Find the existing customer
                 var existingCustomer = await _context.Customers.FindAsync(customer.CustomerID);
                 if (existingCustomer == null)
@@ -104,6 +114,17 @@ namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
                         existingCustomer.Password = PasswordHasher.HashPassword(customer.Password, key, iv);
                         existingCustomer.Email = customer.Email;
                     }
+
+                    // Send confirmation email with credentials using RabbitMQ
+                    var emailDto = new EmailDTO
+                    {
+                        To = customer.Email,
+                        Subject = "Admin Registration Confirmation",
+                        Body = $"Dear {customer.FullName},\n\nYour admin account has been successfully created.\n\nYour login credentials are:\nEmail: {customer.Email}\nPassword: {customer.Password}.\n\nBest regards,\nInsuranceApp Team"
+                    };
+
+                    string message = JsonSerializer.Serialize(emailDto);
+                    _rabbitMqService.SendMessage(message);
                 }
                 else if (existingCustomer.Password != customer.Password)
                 {

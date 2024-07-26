@@ -80,27 +80,6 @@ namespace InsuranceAppRLL
                 .HasForeignKey(s => s.PlanID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Many-to-Many: Employee - Scheme
-            modelBuilder.Entity<Employee>()
-                .HasMany(e => e.Schemes)
-                .WithMany(s => s.Employees)
-                .UsingEntity<Dictionary<string, object>>(
-                    "EmployeeScheme",
-                    j => j
-                        .HasOne<Scheme>()
-                        .WithMany()
-                        .HasForeignKey("SchemeID")
-                        .OnDelete(DeleteBehavior.Restrict),
-                    j => j
-                        .HasOne<Employee>()
-                        .WithMany()
-                        .HasForeignKey("EmployeeID")
-                        .OnDelete(DeleteBehavior.Restrict),
-                    j =>
-                    {
-                        j.HasKey("EmployeeID", "SchemeID");
-                        j.ToTable("EmployeeScheme");
-                    });
         }
     }
 }

@@ -1,27 +1,7 @@
 {
   "admin@example.com": {
     "Email": "admin@example.com",
-    "Key": "K5Ro69yIH1LaFg8qpScNqMqlJHHkr27tSxxoZ4sW9d8=",
-    "Iv": "5K0RCKG5qv3RzWyKR0ZuQQ=="
-  },
-  "employee@example.com": {
-    "Email": "employee@example.com",
-    "Key": "LDmbcP9KQtW871V97jebF44aPNeRMGv9Oaflf04irtY=",
-    "Iv": "4crXBu9YTohZBfqL6DAFWQ=="
-  },
-  "user@example.com": {
-    "Email": "user@example.com",
-    "Key": "2rsNM6QH1oUm25mNzFbLjw3/ZCEQDVxO4c/P4NfWpbU=",
-    "Iv": "REZmfZrnH333hPgX47iN6Q=="
-  },
-  "proiresadah12@gmail.com": {
-    "Email": "proiresadah12@gmail.com",
-    "Key": "OTYI2chagYEQ0NQFo2dZZMPviLCn5WMAX5xC038XKr8=",
-    "Iv": "/xmSI2fLAVpVS2u92/vgiw=="
-  },
-  "admin@examp.com": {
-    "Email": "admin@examp.com",
-    "Key": "tV/\u002BwCtCaW5zRKOuNeppbBS7/0HRTxWVPZOJ4IqIXCA=",
-    "Iv": "1QZODLebRkEnPRKMjgvCAQ=="
+    "Key": "94Bdm/P2Tu4aHfvjbI/r5/arpjJySj7IwCN1uhqJtRU=",
+    "Iv": "P\u002BVWVcO5Em8g06J4PKB7/g=="
   }
 }

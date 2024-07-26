@@ -22,23 +22,13 @@ namespace InsuranceApp.Controllers
         }
 
         [HttpGet]
-        [Route("/customer/{customerId}/policies")]
+        [Route("policy/customer/{customerId}/policies")]
         public async Task<ActionResult<ResponseModel<IEnumerable<Policy>>>> GetAllPoliciesByCustomerIdAsync(int customerId)
         {
             try
             {
                 // Call the service method to get all policies by customer ID
                 var policies = await _policyService.GetAllPoliciesForCustomersAsync(customerId);
-
-                if (policies == null || !policies.Any())
-                {
-                    return new ResponseModel<IEnumerable<Policy>>
-                    {
-                        Data = new List<Policy>(),
-                        Message = "No policies found for the customer.",
-                        Status = false
-                    };
-                }
 
                 // Return the response model with success status
                 return new ResponseModel<IEnumerable<Policy>>
@@ -53,7 +43,6 @@ namespace InsuranceApp.Controllers
                 // Handle specific policy exceptions
                 return new ResponseModel<IEnumerable<Policy>>
                 {
-                    Data = new List<Policy>(),
                     Message = ex.Message,
                     Status = false
                 };
@@ -70,21 +59,13 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        [HttpGet("{policyId}")]
+        [HttpGet("policy/{policyId}")]
         public async Task<ActionResult<ResponseModel<Policy>>> GetPolicyByIdAsync(int policyId)
         {
             try
             {
                 var policy = await _policyService.GetPolicyByIdAsync(policyId);
-                if (policy == null)
-                {
-                    return new ResponseModel<Policy>
-                    {
-                        Data = new Policy(),
-                        Message = $"No policy found with id: {policyId}",
-                        Status = false
-                    };
-                }
+               
                 return new ResponseModel<Policy>
                 {
                     Data = policy,
@@ -96,7 +77,6 @@ namespace InsuranceApp.Controllers
             {
                 return new ResponseModel<Policy>
                 {
-                    Data = new Policy(),
                     Message = ex.Message,
                     Status = false
                 };
@@ -104,7 +84,7 @@ namespace InsuranceApp.Controllers
         }
 
         [HttpPost]
-        [Route("register")]
+        [Route("policy/register")]
         public async Task<ActionResult<ResponseModel<string>>> CreatePolicy([FromBody] PolicyRegistrationModel policyModel)
         {
             try
@@ -134,7 +114,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        [HttpPut("/update/{policyId}")]
+        [HttpPut("policy/update/{policyId}")]
         public async Task<ActionResult<ResponseModel<string>>> UpdatePolicy([FromBody] PolicyUpdateModel updatePolicyModel, int policyId)
         {
             try
@@ -160,7 +140,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        [HttpDelete("/delete/{policyId}")]
+        [HttpDelete("policy/delete/{policyId}")]
         public async Task<ActionResult<ResponseModel<string>>> DeletePolicy(int policyId)
         {
             try

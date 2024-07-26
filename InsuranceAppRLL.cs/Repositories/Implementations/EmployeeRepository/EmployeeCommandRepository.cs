@@ -28,24 +28,30 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
 
         public async Task RegisterEmployeeAsync(Employee employee)
         {
-            string password = employee.Password;
-            // Generate a unique key and IV for the employee
-            using (var aes = System.Security.Cryptography.Aes.Create())
-            {
-                aes.GenerateKey();
-                aes.GenerateIV();
-                byte[] key = aes.Key;
-                byte[] iv = aes.IV;
-
-                // Store the key and IV in a file or secure storage
-                KeyIvManager.SaveKeyAndIv(employee.Email, key, iv);
-
-                // Hash the employee's password using the generated key and IV
-                employee.Password = PasswordHasher.HashPassword(employee.Password, key, iv);
-            }
-
             try
             {
+                if (await _context.Employees.AnyAsync(e => e.Email == employee.Email))
+                {
+                    throw new EmployeeException("An employee with this email already exists.");
+                }
+
+
+                string password = employee.Password;
+                // Generate a unique key and IV for the employee
+                using (var aes = System.Security.Cryptography.Aes.Create())
+                {
+                    aes.GenerateKey();
+                    aes.GenerateIV();
+                    byte[] key = aes.Key;
+                    byte[] iv = aes.IV;
+
+                    // Store the key and IV in a file or secure storage
+                    KeyIvManager.SaveKeyAndIv(employee.Email, key, iv);
+
+                    // Hash the employee's password using the generated key and IV
+                    employee.Password = PasswordHasher.HashPassword(employee.Password, key, iv);
+                }
+
                 await _context.Employees.AddAsync(employee);
                 await _context.SaveChangesAsync();
 
@@ -59,6 +65,10 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
 
                 string message = JsonSerializer.Serialize(emailDto);
                 _rabbitMqService.SendMessage(message);
+            }
+            catch(EmployeeException)
+            {
+                throw;
             }
             catch (DbUpdateException ex)
             {
@@ -87,6 +97,10 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
                     throw new EmployeeException($"No employee found with id: {employeeId}");
                 }
             }
+            catch (EmployeeException)
+            {
+                throw;
+            }
             catch (DbUpdateException ex)
             {
                 // Handle specific database update exceptions
@@ -103,6 +117,12 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
         {
             try
             {
+                if (await _context.Employees.AnyAsync(e => e.Email == employee.Email))
+                {
+                    throw new EmployeeException("An employee with this email already exists.");
+                }
+
+
                 var existingEmployee = await _context.Employees.FindAsync(employee.EmployeeID);
                 if (existingEmployee == null)
                 {
@@ -129,6 +149,17 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
                         existingEmployee.Password = PasswordHasher.HashPassword(employee.Password, key, iv);
                         existingEmployee.Email = employee.Email;
                     }
+
+                    // Send confirmation email with credentials using RabbitMQ
+                    var emailDto = new EmailDTO
+                    {
+                        To = employee.Email,
+                        Subject = "Employee Registration Confirmation",
+                        Body = $"Dear {employee.FullName},\n\nYour employee account has been successfully created.\n\nYour login credentials are:\nEmail: {employee.Email}\nPassword: {employee.Password}.\n\nBest regards,\nInsuranceApp Team"
+                    };
+
+                    string message = JsonSerializer.Serialize(emailDto);
+                    _rabbitMqService.SendMessage(message);
                 }
 
                 if (existingEmployee.Password != employee.Password)
@@ -152,10 +183,9 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
                 _context.Employees.Update(existingEmployee);
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException ex)
+            catch (EmployeeException)
             {
-                // Handle concurrency conflicts
-                throw new EmployeeException("A concurrency conflict occurred while updating the employee.", ex);
+                throw;
             }
             catch (DbUpdateException ex)
             {
