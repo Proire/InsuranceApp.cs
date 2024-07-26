@@ -25,15 +25,19 @@ namespace InsuranceAppRLL.Repositories.Implementations.SchemeRepository
             try
             {
                 List<Scheme> schemas = await _context.Schemes.Where(s => s.PlanID == planId).ToListAsync();
-                if (schemas == null)
+                if (schemas.Count() == 0)
                 {
                     throw new SchemeException("Currently, we are not providing any Schema under this Plan");
                 }
                 return schemas;
             }
-            catch (SqlException ex)
+            catch(SchemeException)
             {
-                throw ex;
+                throw;
+            }
+            catch (SqlException)
+            {
+                throw;
             }
         }
 

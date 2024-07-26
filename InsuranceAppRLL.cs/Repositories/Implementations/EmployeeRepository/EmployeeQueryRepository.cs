@@ -31,17 +31,9 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
                 }
                 return employee;
             }
-            catch (EmployeeException)
-            {
-                throw;
-            }
             catch (SqlException ex)
             {
                 throw new EmployeeException("A database error occurred while retrieving the Employee.", ex);
-            }
-            catch (Exception ex)
-            {
-                throw new EmployeeException("An error occurred while retrieving the Employee.", ex);
             }
         }
 
@@ -56,17 +48,9 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
                 }
                 return employees;
             }
-            catch (EmployeeException)
-            {
-                throw;
-            }
             catch (SqlException ex)
             {
                 throw new EmployeeException("A database error occurred while retrieving the Employees.", ex);
-            }
-            catch (Exception ex)
-            {
-                throw new EmployeeException("An error occurred while retrieving the Employees.", ex);
             }
         }
     }

@@ -21,7 +21,7 @@ namespace InsuranceApp.Controllers
             _logger = logger;
         }
 
-        //[Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
+        [Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
         [HttpPost]
         [Route("employee_user/register")]
         public async Task<ActionResult<ResponseModel<Employee>>> CreateEmployee([FromBody] EmployeeRegistrationModel employee)
@@ -53,7 +53,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        //[Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
+        [Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
         [HttpPut("employee_user/update/{employeeId}")]
         public async Task<ResponseModel<string>> UpdateEmployee([FromBody] EmployeeUpdateModel employeeModel, int employeeId)
         {
@@ -76,7 +76,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        //[Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
+        [Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
         [HttpDelete("employee_user/delete/{employeeId}")]
         public async Task<ResponseModel<string>> DeleteEmployee(int employeeId)
         {
@@ -99,7 +99,8 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        //[Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
+        [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "Employee")]
+        [Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
         [HttpGet("employee_user/{employeeId}")]
         public async Task<ResponseModel<Employee>> GetEmployeeById(int employeeId)
         {
@@ -123,7 +124,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        //[Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
+        [Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
         [HttpGet("employee_user/employees")]
         public async Task<ResponseModel<IEnumerable<Employee>>> GetAllEmployees()
         {

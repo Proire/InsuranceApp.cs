@@ -37,8 +37,5 @@ namespace InsuranceMLL.CustomerModels
         [DataType(DataType.Date, ErrorMessage = "Invalid date format.")]
         [DefaultValue("2000-01-01")]
         public DateTime DateOfBirth { get; set; } = new DateTime(2000, 1, 1);
-
-        [DefaultValue(0)]
-        public int AgentId { get; set; } = 0;
     }
 }

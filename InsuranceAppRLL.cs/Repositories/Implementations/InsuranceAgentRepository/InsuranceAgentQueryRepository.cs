@@ -1,12 +1,8 @@
 ﻿using InsuranceAppRLL.CustomExceptions;
 using InsuranceAppRLL.Entities;
 using InsuranceAppRLL.Repositories.Interfaces.InsuranceAgentRepository;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace InsuranceAppRLL.Repositories.Implementations.InsuranceAgentRepository
 {
@@ -30,7 +26,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.InsuranceAgentRepository
                 }
                 return agent;
             }
-            catch (Exception ex)
+            catch (SqlException ex)
             {
                 throw new InsuranceAgentException("An error occurred while retrieving the insurance agent.", ex);
             }
@@ -48,7 +44,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.InsuranceAgentRepository
                 }
                 return agents;
             }
-            catch (Exception ex)
+            catch (SqlException ex)
             {
                 throw new InsuranceAgentException("An error occurred while retrieving the insurance agents.", ex);
             }

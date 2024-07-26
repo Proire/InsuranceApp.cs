@@ -52,6 +52,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
+        [Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
         [HttpGet("agent_user/agents")]
         public async Task<ResponseModel<IEnumerable<InsuranceAgent>>> GetAllInsuranceAgents()
         {
@@ -75,6 +76,8 @@ namespace InsuranceApp.Controllers
             }
         }
 
+        [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
+        [Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
         [HttpGet("agent_user/{agentId}")]
         public async Task<ResponseModel<InsuranceAgent>> GetAgentById(int agentId)
         {
@@ -100,6 +103,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
+        [Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
         [HttpPut("agent_user/update/{agentId}")]
         public async Task<ResponseModel<string>> UpdateAgent([FromBody] AgentUpdateModel agentModel, int agentId)
         {
@@ -122,6 +126,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
+        [Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
         [HttpDelete("agent_user/delete/{agentId}")]
         public async Task<ResponseModel<string>> DeleteAgent(int agentId)
         {

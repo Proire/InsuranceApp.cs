@@ -3,6 +3,7 @@ using InsuranceAppRLL.CustomExceptions;
 using InsuranceAppRLL.Entities;
 using InsuranceAppRLL.Repositories.Interfaces.AdminRepository;
 using InsuranceAppRLL.Utilities;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
@@ -42,18 +43,13 @@ namespace InsuranceAppRLL.Repositories.Implementations.AdminRepository
                 }
                 else
                 {
-                    throw new AdminException($"No admin found with id: {adminId}");
+                    throw new AdminException($"Admin Not found");
                 }
             }
-            catch (DbUpdateException ex)
+            catch (SqlException ex)
             {
                 // Handle specific database update exceptions
                 throw new AdminException("An error occurred while deleting the admin from the database.", ex);
-            }
-            catch (Exception ex)
-            {
-                // Handle other exceptions
-                throw new AdminException("An unexpected error occurred.", ex);
             }
         }
 
@@ -100,15 +96,10 @@ namespace InsuranceAppRLL.Repositories.Implementations.AdminRepository
                 string message = JsonSerializer.Serialize(emailDto);
                 _rabbitMqService.SendMessage(message);
             }
-            catch (DbUpdateException ex)
+            catch (SqlException ex)
             {
                 // Handle specific database update exceptions
                 throw new AdminException("An error occurred while registering the admin.", ex);
-            }
-            catch (Exception ex)
-            {
-                // Handle other exceptions
-                throw new AdminException("An unexpected error occurred.", ex);
             }
         }
 
@@ -120,7 +111,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.AdminRepository
                 var existingAdmin = await _context.Admins.FindAsync(admin.AdminID);
                 if (existingAdmin == null)
                 {
-                    throw new AdminException($"No admin found with id: {admin.AdminID}");
+                    throw new AdminException($"Admin Not found");
                 }
                 // Check if an admin with the same email already exists
                 if (await _context.Admins.AnyAsync(a => a.AdminID != admin.AdminID && a.Email == admin.Email))
@@ -187,20 +178,10 @@ namespace InsuranceAppRLL.Repositories.Implementations.AdminRepository
                 _context.Admins.Update(existingAdmin);
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                // Handle concurrency conflicts
-                throw new AdminException("A concurrency conflict occurred while updating the admin.", ex);
-            }
-            catch (DbUpdateException ex)
+            catch (SqlException ex)
             {
                 // Handle specific database update exceptions
                 throw new AdminException("An error occurred while updating the admin in the database.", ex);
-            }
-            catch (Exception ex)
-            {
-                // Handle other exceptions
-                throw new AdminException("An unexpected error occurred.", ex);
             }
         }
 

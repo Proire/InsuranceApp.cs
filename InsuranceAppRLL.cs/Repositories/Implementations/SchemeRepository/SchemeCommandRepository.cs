@@ -5,6 +5,7 @@ using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -31,15 +32,19 @@ namespace InsuranceAppRLL.Repositories.Implementations.SchemeRepository
                     {
                         throw new SchemeException("Scheme with the specified name already exists.");
                     }
+                    if (!_context.InsurancePlans.Any(p => p.PlanID == scheme.PlanID))
+                    {
+                        throw new InsurancePlanException($"Plan with specified planId {scheme.PlanID} does not exists");
+                    }
 
                     await _context.Schemes.AddAsync(scheme);
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
                 }
-                catch (SqlException ex)
+                catch (SqlException)
                 {
                     await transaction.RollbackAsync();
-                    throw ex;
+                    throw;
                 }
             }
         }
@@ -71,10 +76,10 @@ namespace InsuranceAppRLL.Repositories.Implementations.SchemeRepository
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
                 }
-                catch (SqlException ex)
+                catch (SqlException)
                 {
                     await transaction.RollbackAsync();
-                    throw ex;
+                    throw;
                 }
             }
         }
@@ -95,10 +100,10 @@ namespace InsuranceAppRLL.Repositories.Implementations.SchemeRepository
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
                 }
-                catch (SqlException ex)
+                catch (SqlException)
                 {
                     await transaction.RollbackAsync();
-                    throw ex;
+                    throw;
                 }
             }
         }
