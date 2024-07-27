@@ -207,6 +207,7 @@ namespace InsuranceApp.cs
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();

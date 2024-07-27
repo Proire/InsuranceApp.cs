@@ -33,6 +33,9 @@ namespace InsuranceMLL.SchemeModels
         [Required(ErrorMessage = "Plan ID is required.")]
         [Range(1, int.MaxValue, ErrorMessage = "Plan ID must be a positive number.")]
         [DefaultValue(1)]
-        public int PlanID { get; set; } = 1;
+        public int PlanID { get; set; }
+
+        [Required(ErrorMessage = "EmployeeId ID is required.")]
+        public int EmployeeId {  get; set; }
     }
 }
