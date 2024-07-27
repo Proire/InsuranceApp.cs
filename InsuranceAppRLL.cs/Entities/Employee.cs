@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace InsuranceAppRLL.Entities
 {
@@ -38,6 +39,7 @@ namespace InsuranceAppRLL.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation property - one Employee manages many schemes
+        [JsonIgnore]
         public virtual ICollection<EmployeeScheme> Schemes { get; set; }
     }
 }
