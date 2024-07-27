@@ -23,7 +23,7 @@ namespace InsuranceApp.Controllers
             _logger = logger;
         }
 
-        [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
+        [Authorize(AuthenticationSchemes = "CustomerScheme", Roles = "Customer")]
         [HttpPost]
         [Route("customer_user/register")]
         public async Task<ActionResult<ResponseModel<Customer>>> CreateCustomer([FromBody] CustomerRegistrationModel customer)
@@ -96,7 +96,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
+        [Authorize(AuthenticationSchemes = "CustomerScheme", Roles = "Customer")]
         [HttpPut("customer_user/{customerId}")]
         public async Task<ActionResult<ResponseModel<string>>> UpdateCustomer([FromBody] CustomerUpdateModel customerUpdateModel, int customerId)
         {
