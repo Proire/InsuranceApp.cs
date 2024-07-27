@@ -2,13 +2,6 @@
 using InsuranceAppRLL.Entities;
 using InsuranceAppRLL.Repositories.Interfaces.InsurancePlanRepository;
 using Microsoft.Data.SqlClient;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using System.Transactions;
 
 namespace InsuranceAppRLL.Repositories.Implementations.InsurancePlanRepository
 {
@@ -34,10 +27,10 @@ namespace InsuranceAppRLL.Repositories.Implementations.InsurancePlanRepository
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
                 }
-                catch(SqlException ex)
+                catch(SqlException)
                 {
                     transaction.Rollback();
-                    throw ex;
+                    throw;
                 }
             }
         }
@@ -57,10 +50,10 @@ namespace InsuranceAppRLL.Repositories.Implementations.InsurancePlanRepository
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
                 }
-                catch (SqlException ex)
+                catch (SqlException)
                 {
                     transaction.Rollback();
-                    throw ex;
+                    throw;
                 }
             }
         }
@@ -86,10 +79,10 @@ namespace InsuranceAppRLL.Repositories.Implementations.InsurancePlanRepository
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
                 }
-                catch (SqlException ex)
+                catch (SqlException)
                 {
                     transaction.Rollback();
-                    throw ex;
+                    throw;
                 }
             }
         }

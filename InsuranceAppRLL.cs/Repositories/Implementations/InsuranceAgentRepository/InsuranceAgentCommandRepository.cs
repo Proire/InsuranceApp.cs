@@ -3,6 +3,7 @@ using InsuranceAppRLL.CustomExceptions;
 using InsuranceAppRLL.Entities;
 using InsuranceAppRLL.Repositories.Interfaces.InsuranceAgentRepository;
 using InsuranceAppRLL.Utilities;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -65,19 +66,10 @@ namespace InsuranceAppRLL.Repositories.Implementations.InsuranceAgentRepository
                 string message = JsonSerializer.Serialize(emailDto);
                 _rabbitMqService.SendMessage(message);
             }
-            catch(InsuranceAgentException)
-            {
-                throw;
-            }
-            catch (DbUpdateException ex)
+            catch (SqlException ex)
             {
                 // Handle specific database update exceptions
                 throw new InsuranceAgentException("An error occurred while registering the insurance agent.", ex);
-            }
-            catch (Exception ex)
-            {
-                // Handle other exceptions
-                throw new InsuranceAgentException("An unexpected error occurred.", ex);
             }
         }
 
@@ -97,19 +89,10 @@ namespace InsuranceAppRLL.Repositories.Implementations.InsuranceAgentRepository
                     throw new InsuranceAgentException($"No agent found with id: {agentId}");
                 }
             }
-            catch (InsuranceAgentException)
-            {
-                throw;
-            }
-            catch (DbUpdateException ex)
+            catch (SqlException ex)
             {
                 // Handle specific database update exceptions
                 throw new InsuranceAgentException("An error occurred while deleting the agent from the database.", ex);
-            }
-            catch (Exception ex)
-            {
-                // Handle other exceptions
-                throw new InsuranceAgentException("An unexpected error occurred.", ex);
             }
         }
 
@@ -183,24 +166,10 @@ namespace InsuranceAppRLL.Repositories.Implementations.InsuranceAgentRepository
                 _context.InsuranceAgents.Update(existingAgent);
                 await _context.SaveChangesAsync();
             }
-            catch (InsuranceAgentException)
-            {
-                throw;
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                // Handle concurrency conflicts
-                throw new InsuranceAgentException("A concurrency conflict occurred while updating the agent.", ex);
-            }
-            catch (DbUpdateException ex)
+            catch (SqlException ex)
             {
                 // Handle specific database update exceptions
                 throw new InsuranceAgentException("An error occurred while updating the agent in the database.", ex);
-            }
-            catch (Exception ex)
-            {
-                // Handle other exceptions
-                throw new InsuranceAgentException("An unexpected error occurred.", ex);
             }
         }
     }

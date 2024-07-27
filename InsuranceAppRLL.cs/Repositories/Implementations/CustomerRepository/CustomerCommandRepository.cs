@@ -3,6 +3,7 @@ using InsuranceAppRLL.CustomExceptions;
 using InsuranceAppRLL.Entities;
 using InsuranceAppRLL.Repositories.Interfaces.CustomerRepository;
 using InsuranceAppRLL.Utilities;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -64,15 +65,10 @@ namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
                 string message = JsonSerializer.Serialize(emailDto);
                 _rabbitMqService.SendMessage(message);
             }
-            catch (DbUpdateException ex)
+            catch (SqlException ex)
             {
                 // Handle specific database update exceptions
                 throw new CustomerException("An error occurred while registering the customer.", ex);
-            }
-            catch (Exception ex)
-            {
-                // Handle other exceptions
-                throw new CustomerException("An unexpected error occurred.", ex);
             }
         }
 
@@ -80,13 +76,11 @@ namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
         {
             try
             {
-               
-
                 // Find the existing customer
                 var existingCustomer = await _context.Customers.FindAsync(customer.CustomerID);
                 if (existingCustomer == null)
                 {
-                    throw new CustomerException($"No customer found with id: {customer.CustomerID}");
+                    throw new CustomerException($"Customer Not found");
                 }
                 if (await _context.Customers.AnyAsync(c => c.CustomerID != customer.CustomerID && c.Email == customer.Email))
                 {
@@ -148,20 +142,10 @@ namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
                 _context.Customers.Update(existingCustomer);
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                // Handle concurrency conflicts
-                throw new CustomerException("A concurrency conflict occurred while updating the customer.", ex);
-            }
-            catch (DbUpdateException ex)
+            catch (SqlException ex)
             {
                 // Handle specific database update exceptions
                 throw new CustomerException("An error occurred while updating the customer in the database.", ex);
-            }
-            catch (Exception ex)
-            {
-                // Handle other exceptions
-                throw new CustomerException("An unexpected error occurred.", ex);
             }
         }
 
@@ -180,18 +164,13 @@ namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
                 }
                 else
                 {
-                    throw new CustomerException($"No customer found with id: {customerId}");
+                    throw new CustomerException($"Customer Not found");
                 }
             }
-            catch (DbUpdateException ex)
+            catch (SqlException ex)
             {
                 // Handle specific database update exceptions
                 throw new CustomerException("An error occurred while deleting the customer from the database.", ex);
-            }
-            catch (Exception ex)
-            {
-                // Handle other exceptions
-                throw new CustomerException("An unexpected error occurred.", ex);
             }
         }
     }

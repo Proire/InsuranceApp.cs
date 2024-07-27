@@ -26,15 +26,19 @@ namespace InsuranceAppRLL.Repositories.Implementations.InsurancePlanRepository
             try
             {
                 List<InsurancePlan> insurancePlans = await _context.InsurancePlans.ToListAsync();
-                if(insurancePlans==null)
+                if(insurancePlans.Count() == 0)
                 {
                     throw new InsurancePlanException("Currently, we are not Providing any Insurance Plan");
                 }
                 return insurancePlans;
             }
-            catch (SqlException ex)
+            catch (InsurancePlanException)
             {
-                throw ex;
+                throw;
+            }
+            catch (SqlException)
+            {
+                throw;
             }
         }
 
@@ -45,9 +49,13 @@ namespace InsuranceAppRLL.Repositories.Implementations.InsurancePlanRepository
                 InsurancePlan? insurancePlan = await _context.InsurancePlans.FindAsync(planId);
                 if (insurancePlan == null)
                 {
-                    throw new InsurancePlanException("Insurance Plan does not exists");
+                    throw new InsurancePlanException($"No Insurance Plan with planId {planId} exists");
                 }
                 return insurancePlan;
+            }
+            catch(InsurancePlanException)
+            {
+                throw;
             }
             catch (SqlException ex)
             {

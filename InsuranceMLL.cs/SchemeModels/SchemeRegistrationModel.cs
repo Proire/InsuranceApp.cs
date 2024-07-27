@@ -34,8 +34,5 @@ namespace InsuranceMLL.SchemeModels
         [Range(1, int.MaxValue, ErrorMessage = "Plan ID must be a positive number.")]
         [DefaultValue(1)]
         public int PlanID { get; set; } = 1;
-
-        [DefaultValue(0)]
-        public int CreatedBy { get; set; } = 0; // Assuming created by is optional, set default as 0
     }
 }

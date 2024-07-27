@@ -3,6 +3,7 @@ using InsuranceAppRLL.CustomExceptions;
 using InsuranceAppRLL.Entities;
 using InsuranceAppRLL.Repositories.Interfaces.EmployeeRepository;
 using InsuranceAppRLL.Utilities;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -66,19 +67,10 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
                 string message = JsonSerializer.Serialize(emailDto);
                 _rabbitMqService.SendMessage(message);
             }
-            catch(EmployeeException)
-            {
-                throw;
-            }
-            catch (DbUpdateException ex)
+            catch (SqlException ex)
             {
                 // Handle specific database update exceptions
                 throw new EmployeeException("An error occurred while registering the employee.", ex);
-            }
-            catch (Exception ex)
-            {
-                // Handle other exceptions
-                throw new EmployeeException("An unexpected error occurred.", ex);
             }
         }
 
@@ -98,19 +90,10 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
                     throw new EmployeeException($"No employee found with id: {employeeId}");
                 }
             }
-            catch (EmployeeException)
-            {
-                throw;
-            }
-            catch (DbUpdateException ex)
+            catch (SqlException ex)
             {
                 // Handle specific database update exceptions
                 throw new EmployeeException("An error occurred while deleting the employee from the database.", ex);
-            }
-            catch (Exception ex)
-            {
-                // Handle other exceptions
-                throw new EmployeeException("An unexpected error occurred.", ex);
             }
         }
 
@@ -183,19 +166,10 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
                 _context.Employees.Update(existingEmployee);
                 await _context.SaveChangesAsync();
             }
-            catch (EmployeeException)
-            {
-                throw;
-            }
-            catch (DbUpdateException ex)
+            catch (SqlException ex)
             {
                 // Handle specific database update exceptions
                 throw new EmployeeException("An error occurred while updating the employee in the database.", ex);
-            }
-            catch (Exception ex)
-            {
-                // Handle other exceptions
-                throw new EmployeeException("An unexpected error occurred.", ex);
             }
         }
     }

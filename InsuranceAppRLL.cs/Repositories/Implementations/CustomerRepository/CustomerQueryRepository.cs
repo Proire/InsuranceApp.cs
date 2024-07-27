@@ -30,15 +30,11 @@ namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
                 var customer = await _context.Customers.FindAsync(customerId);
                 if (customer == null)
                 {
-                    throw new CustomerException($"No customer found with id: {customerId}");
+                    throw new CustomerException($"Customer not found");
                 }
                 return customer;
             }
-            catch (CustomerException)
-            {
-                throw;
-            }
-            catch (Exception ex)
+            catch (SqlException ex)
             {
                 throw new CustomerException("An error occurred while retrieving the customer.", ex);
             }
@@ -55,10 +51,6 @@ namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
                 }
                 return customers;
             }
-            catch (CustomerException)
-            {
-                throw;
-            }
             catch (Exception ex)
             {
                 throw new CustomerException("An error occurred while retrieving the customers.", ex);
@@ -74,22 +66,13 @@ namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
 
                 if (!customers.Any())
                 {
-                    throw new CustomerException($"No agent found with id: {agentId}");
+                    throw new CustomerException($"Agent Not found");
                 }
-
                 return customers;
-            }
-            catch (CustomerException)
-            {
-                throw;
             }
             catch (SqlException ex)
             {
                 throw new CustomerException("Error occurred while fetching data: ", ex);
-            }
-            catch (Exception ex)
-            {
-                throw new CustomerException(ex.Message, ex);
             }
         }
     }
