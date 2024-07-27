@@ -22,7 +22,7 @@ namespace InsuranceApp.Controllers
         }
 
 
-        [HttpPost]
+        [HttpPost("login_user/login")]
         public async Task<ActionResult<ResponseModel<string>>> LoginAsync([FromBody] LoginModel model)
         {
             try

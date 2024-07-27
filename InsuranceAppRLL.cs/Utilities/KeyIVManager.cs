@@ -71,6 +71,22 @@ namespace BookStoreRL.Utilities
             }
         }
 
+        // Delete the key and IV for a specific email address
+        public static void DeleteKeyAndIv(string email)
+        {
+            var existingData = ReadAllKeysAndIvs();
+
+            if (existingData.Remove(email))
+            {
+                string jsonString = JsonSerializer.Serialize(existingData, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(FilePath, jsonString);
+            }
+            else
+            {
+                throw new ArgumentException("Email address not found. Cannot delete key and IV.");
+            }
+        }
+
         // Read all keys and IVs from the JSON file
         private static Dictionary<string, EmailKeyIv> ReadAllKeysAndIvs()
         {

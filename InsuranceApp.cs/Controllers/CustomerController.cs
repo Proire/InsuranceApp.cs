@@ -23,13 +23,16 @@ namespace InsuranceApp.Controllers
             _logger = logger;
         }
 
+        [Authorize(AuthenticationSchemes = "CustomerScheme", Roles = "Customer")]
         [HttpPost]
-        [Route("/customer_user/register")]
+        [Route("customer_user/register")]
         public async Task<ActionResult<ResponseModel<Customer>>> CreateCustomer([FromBody] CustomerRegistrationModel customer)
         {
             try
             {
-                await _customerService.RegisterCustomerAsync(customer);
+                int agentId = Convert.ToInt32(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+                await _customerService.RegisterCustomerAsync(customer,agentId);
 
                 // Log the registration event
                // _logger.LogInformation($"Customer {customer.Email} registered.");
@@ -54,23 +57,16 @@ namespace InsuranceApp.Controllers
             }
         }
 
+        [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
         [HttpGet]
-        [Route("/customer_user/agent/customers/{agentId}")]
-        public async Task<ResponseModel<IEnumerable<Customer>>> GetCustomersByAgentIdAsync(int agentId)
+        [Route("customer_user/agent/customers")]
+        public async Task<ResponseModel<IEnumerable<Customer>>> GetCustomersByAgentIdAsync()
         {
             try
             {
+                int agentId = Convert.ToInt32(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
                 // Call the repository method to get the customers
                 var customers = await _customerService.GetCustomers(agentId);
-
-                if (customers == null || !customers.Any())
-                {
-                    return new ResponseModel<IEnumerable<Customer>>
-                    {
-                        Message = "No customers found for the agent.",
-                        Status = false
-                    };
-                }
 
                 // Return the response model with success status
                 return new ResponseModel<IEnumerable<Customer>>
@@ -100,12 +96,15 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        [HttpPut("/customer_user/{customerId}")]
+        [Authorize(AuthenticationSchemes = "CustomerScheme", Roles = "Customer")]
+        [HttpPut("customer_user/{customerId}")]
         public async Task<ActionResult<ResponseModel<string>>> UpdateCustomer([FromBody] CustomerUpdateModel customerUpdateModel, int customerId)
         {
             try
             {
-                await _customerService.UpdateCustomerAsync(customerUpdateModel, customerId);
+                int agentId = Convert.ToInt32(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+                await _customerService.UpdateCustomerAsync(customerUpdateModel, customerId, agentId);
                 return new ResponseModel<string>
                 {
                     Message = "Customer updated successfully",
@@ -122,7 +121,8 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        [HttpDelete("{customerId}")]
+        [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
+        [HttpDelete("customer_user/{customerId}")]
         public async Task<ActionResult<ResponseModel<string>>> DeleteCustomer(int customerId)
         {
             try
@@ -144,21 +144,13 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        [HttpGet("{customerId}")]
+        [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
+        [HttpGet("customer_user/{customerId}")]
         public async Task<ActionResult<ResponseModel<Customer>>> GetCustomerById(int customerId)
         {
             try
             {
                 var customer = await _customerService.GetCustomerByIdAsync(customerId);
-                if (customer == null)
-                {
-                    return new ResponseModel<Customer>
-                    {
-                        Data = new Customer(),
-                        Message = $"No customer found with id: {customerId}",
-                        Status = false
-                    };
-                }
                 return new ResponseModel<Customer>
                 {
                     Data = customer,
@@ -170,28 +162,19 @@ namespace InsuranceApp.Controllers
             {
                 return new ResponseModel<Customer>
                 {
-                    Data = new Customer(),
                     Message = ex.Message,
                     Status = false
                 };
             }
         }
 
-        [HttpGet("/getallCustomers")]
+        [Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
+        [HttpGet("customer_user/Customers")]
         public async Task<ActionResult<ResponseModel<IEnumerable<Customer>>>> GetAllCustomers()
         {
             try
             {
                 var customers = await _customerService.GetAllCustomersAsync();
-                if (customers == null || !customers.Any())
-                {
-                    return new ResponseModel<IEnumerable<Customer>>
-                    {
-                        Data = new List<Customer>(),
-                        Message = "No customers found.",
-                        Status = false
-                    };
-                }
                 return new ResponseModel<IEnumerable<Customer>>
                 {
                     Data = customers,
@@ -203,7 +186,6 @@ namespace InsuranceApp.Controllers
             {
                 return new ResponseModel<IEnumerable<Customer>>
                 {
-                    Data = new List<Customer>(),
                     Message = ex.Message,
                     Status = false
                 };

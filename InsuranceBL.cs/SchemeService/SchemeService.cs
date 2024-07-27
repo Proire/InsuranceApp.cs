@@ -35,7 +35,10 @@ namespace InsuranceAppBLL.SchemeService
             var command = new InsertSchemeCommand(
                 schemeModel.SchemeName,
                 schemeModel.SchemeDetails,
-                schemeModel.PlanID
+                schemeModel.PlanID,
+                schemeModel.SchemePrice,
+                schemeModel.SchemeCover,
+                schemeModel.SchemeTenure
             );
             await _mediator.Send(command);
         }
@@ -46,7 +49,10 @@ namespace InsuranceAppBLL.SchemeService
                 schemeId,
                 schemeModel.SchemeName,
                 schemeModel.SchemeDetails,
-                schemeModel.PlanID
+                schemeModel.PlanID,
+                schemeModel.SchemePrice,
+                schemeModel.SchemeCover,
+                schemeModel.SchemeTenure
             );
             await _mediator.Send(command);
         }

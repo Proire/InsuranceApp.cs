@@ -1,6 +1,7 @@
 ﻿using InsuranceAppRLL.CustomExceptions;
 using InsuranceAppRLL.Entities;
 using InsuranceAppRLL.Repositories.Interfaces.AdminRepository;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -26,11 +27,11 @@ namespace InsuranceAppRLL.Repositories.Implementations.AdminRepository
                 var book = await _context.Admins.FindAsync(adminId);
                 if (book == null)
                 {
-                    throw new AdminException($"No Admin found with id: {adminId}");
+                    throw new AdminException($"Admin Not found");
                 }
                 return book;
             }
-            catch (Exception ex)
+            catch (SqlException ex)
             {
                 throw new AdminException("An error occurred while retrieving the Admin.", ex);
             }
@@ -47,7 +48,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.AdminRepository
                 }
                 return books;
             }
-            catch (Exception ex)
+            catch (SqlException ex)
             {
                 throw new AdminException("An error occurred while retrieving the Admins.", ex);
             }

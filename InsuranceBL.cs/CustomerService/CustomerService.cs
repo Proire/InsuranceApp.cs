@@ -27,9 +27,9 @@ namespace InsuranceAppBLL.CustomerService
             return _mediator.Send(command);
         }
 
-        public async Task RegisterCustomerAsync(CustomerRegistrationModel customer)
+        public async Task RegisterCustomerAsync(CustomerRegistrationModel customer, int agentId)
         {
-            var command = new InsertCustomerCommand(customer.FullName, customer.Email, customer.Password, customer.Phone, customer.DateOfBirth,customer.AgentId);
+            var command = new InsertCustomerCommand(customer.FullName, customer.Email, customer.Password, customer.Phone, customer.DateOfBirth,agentId);
             await _mediator.Send(command);
         }
 
@@ -48,7 +48,7 @@ namespace InsuranceAppBLL.CustomerService
             return await _mediator.Send(new GetAllCustomersQuery());
         }
 
-        public async Task UpdateCustomerAsync(CustomerUpdateModel customerUpdateModel, int customerId)
+        public async Task UpdateCustomerAsync(CustomerUpdateModel customerUpdateModel, int customerId, int agentId)
         {
             await _mediator.Send(new UpdateCustomerCommand(
                 customerId,
@@ -57,7 +57,7 @@ namespace InsuranceAppBLL.CustomerService
                 customerUpdateModel.Password,
                 customerUpdateModel.Phone,
                 customerUpdateModel.DateOfBirth,
-                customerUpdateModel.AgentId
+                agentId
             ));
         }
 

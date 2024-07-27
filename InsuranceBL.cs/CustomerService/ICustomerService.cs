@@ -10,13 +10,13 @@ namespace InsuranceAppBLL.CustomerService
 {
     public interface ICustomerService
     {
-        Task RegisterCustomerAsync(CustomerRegistrationModel customer);
+        Task RegisterCustomerAsync(CustomerRegistrationModel customer,int agentId);
 
         Task<IEnumerable<Customer>> GetCustomers(int agentId);
 
         Task DeleteCustomerAsync(int customerId);
 
-        Task UpdateCustomerAsync(CustomerUpdateModel customer, int customerId);
+        Task UpdateCustomerAsync(CustomerUpdateModel customer, int customerId, int agentId);
 
         Task<IEnumerable<Customer>> GetAllCustomersAsync();
 

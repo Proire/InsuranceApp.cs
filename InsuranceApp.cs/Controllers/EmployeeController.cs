@@ -23,7 +23,7 @@ namespace InsuranceApp.Controllers
 
         [Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
         [HttpPost]
-        [Route("register")]
+        [Route("employee_user/register")]
         public async Task<ActionResult<ResponseModel<Employee>>> CreateEmployee([FromBody] EmployeeRegistrationModel employee)
         {
             try
@@ -54,7 +54,7 @@ namespace InsuranceApp.Controllers
         }
 
         [Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
-        [HttpPut("/update/{employeeId}")]
+        [HttpPut("employee_user/update/{employeeId}")]
         public async Task<ResponseModel<string>> UpdateEmployee([FromBody] EmployeeUpdateModel employeeModel, int employeeId)
         {
             try
@@ -77,7 +77,7 @@ namespace InsuranceApp.Controllers
         }
 
         [Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
-        [HttpDelete("/delete/{employeeId}")]
+        [HttpDelete("employee_user/delete/{employeeId}")]
         public async Task<ResponseModel<string>> DeleteEmployee(int employeeId)
         {
             try
@@ -99,22 +99,14 @@ namespace InsuranceApp.Controllers
             }
         }
 
+        [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "Employee")]
         [Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
-        [HttpGet("/{employeeId}")]
+        [HttpGet("employee_user/{employeeId}")]
         public async Task<ResponseModel<Employee>> GetEmployeeById(int employeeId)
         {
             try
             {
                 var employee = await _employeeService.GetEmployeeByIdAsync(employeeId);
-                if (employee == null)
-                {
-                    return new ResponseModel<Employee>
-                    {
-                        Data = new Employee(),
-                        Message = $"No employee found with id: {employeeId}",
-                        Status = false
-                    };
-                }
                 return new ResponseModel<Employee>
                 {
                     Data = employee,
@@ -126,7 +118,6 @@ namespace InsuranceApp.Controllers
             {
                 return new ResponseModel<Employee>
                 {
-                    Data = new Employee(),
                     Message = ex.Message,
                     Status = false
                 };
@@ -134,7 +125,7 @@ namespace InsuranceApp.Controllers
         }
 
         [Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
-        [HttpGet("/employees")]
+        [HttpGet("employee_user/employees")]
         public async Task<ResponseModel<IEnumerable<Employee>>> GetAllEmployees()
         {
             try
@@ -151,7 +142,6 @@ namespace InsuranceApp.Controllers
             {
                 return new ResponseModel<IEnumerable<Employee>>
                 {
-                    Data = new List<Employee>(),
                     Message = ex.Message,
                     Status = false
                 };

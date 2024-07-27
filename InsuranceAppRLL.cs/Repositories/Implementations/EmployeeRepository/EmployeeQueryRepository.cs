@@ -35,10 +35,6 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
             {
                 throw new EmployeeException("A database error occurred while retrieving the Employee.", ex);
             }
-            catch (Exception ex)
-            {
-                throw new EmployeeException("An error occurred while retrieving the Employee.", ex);
-            }
         }
 
         public async Task<IEnumerable<Employee>> GetAllEmployeesAsync()
@@ -55,10 +51,6 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
             catch (SqlException ex)
             {
                 throw new EmployeeException("A database error occurred while retrieving the Employees.", ex);
-            }
-            catch (Exception ex)
-            {
-                throw new EmployeeException("An error occurred while retrieving the Employees.", ex);
             }
         }
     }

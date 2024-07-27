@@ -1,4 +1,4 @@
-﻿using InsuranceAppRLL.CQRS.Commands.InsurancePlanCommands;
+using InsuranceAppRLL.CQRS.Commands.InsurancePlanCommands;
 using InsuranceAppRLL.CQRS.Queries.InsurancePlanQueries;
 using InsuranceAppRLL.Entities;
 using InsuranceMLL.InsurancePlanModels;
@@ -13,6 +13,7 @@ namespace InsuranceAppBLL.InsurancePlanService
 {
     public class InsurancePlanService : IInsurancePlanService
     {
+
         private readonly IMediator _mediator;
 
         public InsurancePlanService(IMediator mediator)

@@ -10,9 +10,7 @@ namespace InsuranceAppRLL.Repositories.Interfaces.PolicyRepository
     public interface IPolicyCommandRepository
     {
         Task AddPolicy(Policy policy);
-
         Task UpdatePolicy(Policy policy);
-
         Task DeletePolicy(int policyId);
     }
 }

@@ -20,12 +20,19 @@ namespace InsuranceMLL.SchemeModels
         [DefaultValue("Details about the scheme.")]
         public string SchemeDetails { get; set; } = "Details about the scheme.";
 
+        [Required]
+        public double SchemePrice { get; set; }
+
+        [Required]
+        public double SchemeCover { get; set; }
+
+        [Required]
+        public int SchemeTenure { get; set; }
+
+
         [Required(ErrorMessage = "Plan ID is required.")]
         [Range(1, int.MaxValue, ErrorMessage = "Plan ID must be a positive number.")]
         [DefaultValue(1)]
         public int PlanID { get; set; } = 1;
-
-        [DefaultValue(0)]
-        public int CreatedBy { get; set; } = 0; // Assuming created by is optional, set default as 0
     }
 }

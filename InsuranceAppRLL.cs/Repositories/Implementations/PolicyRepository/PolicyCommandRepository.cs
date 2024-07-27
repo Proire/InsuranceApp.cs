@@ -25,7 +25,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.PolicyRepository
             {
                 try
                 {
-                    if (_context.Policies.Any(p => p.PolicyDetails.Equals(policy.PolicyDetails) && p.CustomerID == policy.CustomerID))
+                    if (_context.Policies.Any(p => p.PolicyDetails.Equals(policy.PolicyDetails) && p.CustomerID == policy.CustomerID && p.SchemeID == policy.SchemeID))
                     {
                         throw new PolicyException("Policy with the specified details already exists for this customer");
                     }
@@ -33,10 +33,10 @@ namespace InsuranceAppRLL.Repositories.Implementations.PolicyRepository
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
                 }
-                catch (SqlException ex)
+                catch (SqlException)
                 {
                     transaction.Rollback();
-                    throw ex;
+                    throw;
                 }
             }
         }
@@ -69,10 +69,10 @@ namespace InsuranceAppRLL.Repositories.Implementations.PolicyRepository
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
                 }
-                catch (SqlException ex)
+                catch (SqlException)
                 {
                     transaction.Rollback();
-                    throw ex;
+                    throw;
                 }
             }
         }
@@ -92,10 +92,10 @@ namespace InsuranceAppRLL.Repositories.Implementations.PolicyRepository
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
                 }
-                catch (SqlException ex)
+                catch (SqlException)
                 {
                     transaction.Rollback();
-                    throw ex;
+                    throw;
                 }
             }
         }
