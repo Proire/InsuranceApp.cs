@@ -13,6 +13,7 @@ using InsuranceAppRLL.Repositories.Implementations;
 using InsuranceAppRLL.Repositories.Implementations.AdminRepository;
 using InsuranceAppRLL.Repositories.Implementations.CustomerRepository;
 using InsuranceAppRLL.Repositories.Implementations.EmployeeRepository;
+using InsuranceAppRLL.Repositories.Implementations.EmployeeSchemeRepository;
 using InsuranceAppRLL.Repositories.Implementations.InsuranceAgentRepository;
 using InsuranceAppRLL.Repositories.Implementations.InsurancePlanRepository;
 using InsuranceAppRLL.Repositories.Implementations.PolicyRepository;
@@ -21,6 +22,7 @@ using InsuranceAppRLL.Repositories.Interfaces;
 using InsuranceAppRLL.Repositories.Interfaces.AdminRepository;
 using InsuranceAppRLL.Repositories.Interfaces.CustomerRepository;
 using InsuranceAppRLL.Repositories.Interfaces.EmployeeRepository;
+using InsuranceAppRLL.Repositories.Interfaces.EmployeeSchemeRepository;
 using InsuranceAppRLL.Repositories.Interfaces.InsuranceAgentRepository;
 using InsuranceAppRLL.Repositories.Interfaces.InsurancePlanRepository;
 using InsuranceAppRLL.Repositories.Interfaces.PolicyRepository;
@@ -82,7 +84,9 @@ namespace InsuranceApp.cs
             builder.Services.AddScoped<IPolicyQueryRepository, PolicyQueryRepository>();
 
             builder.Services.AddScoped<ISchemeCommandRepository, SchemeCommandRepository>();
-            builder.Services.AddScoped<ISchemeQueryRepository, SchemeQueryRepository>();    
+            builder.Services.AddScoped<ISchemeQueryRepository, SchemeQueryRepository>();  
+            
+            builder.Services.AddScoped<IEmployeeSchemeCommandRepository, EmployeeSchemeCommandRepository>();
 
             // Business layer services
             builder.Services.AddScoped<IAdminService,AdminService>();
