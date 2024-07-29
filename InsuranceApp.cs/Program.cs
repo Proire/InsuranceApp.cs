@@ -11,20 +11,24 @@ using InsuranceAppRLL.CQRS.Handlers.AdminHandlers;
 using InsuranceAppRLL.Entities;
 using InsuranceAppRLL.Repositories.Implementations;
 using InsuranceAppRLL.Repositories.Implementations.AdminRepository;
+using InsuranceAppRLL.Repositories.Implementations.CommissionRepository;
 using InsuranceAppRLL.Repositories.Implementations.CustomerRepository;
 using InsuranceAppRLL.Repositories.Implementations.EmployeeRepository;
 using InsuranceAppRLL.Repositories.Implementations.EmployeeSchemeRepository;
 using InsuranceAppRLL.Repositories.Implementations.InsuranceAgentRepository;
 using InsuranceAppRLL.Repositories.Implementations.InsurancePlanRepository;
+using InsuranceAppRLL.Repositories.Implementations.PaymentRepository;
 using InsuranceAppRLL.Repositories.Implementations.PolicyRepository;
 using InsuranceAppRLL.Repositories.Implementations.SchemeRepository;
 using InsuranceAppRLL.Repositories.Interfaces;
 using InsuranceAppRLL.Repositories.Interfaces.AdminRepository;
+using InsuranceAppRLL.Repositories.Interfaces.CommissionRepository;
 using InsuranceAppRLL.Repositories.Interfaces.CustomerRepository;
 using InsuranceAppRLL.Repositories.Interfaces.EmployeeRepository;
 using InsuranceAppRLL.Repositories.Interfaces.EmployeeSchemeRepository;
 using InsuranceAppRLL.Repositories.Interfaces.InsuranceAgentRepository;
 using InsuranceAppRLL.Repositories.Interfaces.InsurancePlanRepository;
+using InsuranceAppRLL.Repositories.Interfaces.PaymentRepository;
 using InsuranceAppRLL.Repositories.Interfaces.PolicyRepository;
 using InsuranceAppRLL.Repositories.Interfaces.SchemeRepository;
 using InsuranceAppRLL.Utilities;
@@ -87,6 +91,10 @@ namespace InsuranceApp.cs
             builder.Services.AddScoped<ISchemeQueryRepository, SchemeQueryRepository>();  
             
             builder.Services.AddScoped<IEmployeeSchemeCommandRepository, EmployeeSchemeCommandRepository>();
+
+            builder.Services.AddScoped<IPaymentQueryRepository, PaymentQueryRepository>();
+
+            builder.Services.AddScoped<ICommissionQueryRepository, CommissionQueryRepository>();
 
             // Business layer services
             builder.Services.AddScoped<IAdminService,AdminService>();
