@@ -29,6 +29,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.PolicyRepository
                     {
                         throw new PolicyException("Policy with the specified details already exists for this customer");
                     }
+                    
                     await _context.Policies.AddAsync(policy);
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();

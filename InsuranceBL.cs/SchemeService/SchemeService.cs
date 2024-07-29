@@ -38,7 +38,8 @@ namespace InsuranceAppBLL.SchemeService
                 schemeModel.PlanID,
                 schemeModel.SchemePrice,
                 schemeModel.SchemeCover,
-                schemeModel.SchemeTenure
+                schemeModel.SchemeTenure,
+                schemeModel.EmployeeId
             );
             await _mediator.Send(command);
         }

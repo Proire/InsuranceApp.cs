@@ -14,6 +14,7 @@ namespace InsuranceAppRLL
         public DbSet<Policy> Policies { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Commission> Commissions { get; set; }
+        public DbSet<EmployeeScheme> EmployeeSchemes {  get; set; }
 
         public InsuranceDbContext(DbContextOptions<InsuranceDbContext> options)
             : base(options)

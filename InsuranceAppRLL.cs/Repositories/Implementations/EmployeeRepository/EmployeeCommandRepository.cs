@@ -2,6 +2,7 @@
 using InsuranceAppRLL.CustomExceptions;
 using InsuranceAppRLL.Entities;
 using InsuranceAppRLL.Repositories.Interfaces.EmployeeRepository;
+using InsuranceAppRLL.Repositories.Interfaces.EmployeeSchemeRepository;
 using InsuranceAppRLL.Utilities;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -20,11 +21,13 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
     {
         private readonly InsuranceDbContext _context;
         private readonly RabitMQProducer _rabbitMqService;
+        private readonly IEmployeeSchemeCommandRepository _employeeSchemeCommand;
 
-        public EmployeeCommandRepository(InsuranceDbContext context, RabitMQProducer rabbitMqService)
+        public EmployeeCommandRepository(InsuranceDbContext context, RabitMQProducer rabbitMqService,IEmployeeSchemeCommandRepository employeeSchemeCommand)
         {
             _context = context;
             _rabbitMqService = rabbitMqService;
+            _employeeSchemeCommand = employeeSchemeCommand;
         }
 
         public async Task RegisterEmployeeAsync(Employee employee)
@@ -82,6 +85,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
                 if (employee != null)
                 {
                     _context.Employees.Remove(employee);
+                    await _employeeSchemeCommand.DeleteEmployeeFromScheme(employeeId);
                     await _context.SaveChangesAsync();
                     KeyIvManager.DeleteKeyAndIv(employee.Email);
                 }

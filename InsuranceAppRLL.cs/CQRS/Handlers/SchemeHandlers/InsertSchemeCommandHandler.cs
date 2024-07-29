@@ -28,10 +28,10 @@ namespace InsuranceAppRLL.CQRS.Handlers.SchemeHandlers
                 PlanID = request.PlanID,
                 SchemeCover = request.SchemeCover,
                 SchemeTenure = request.SchemeTenure,
-                SchemePrice = request.SchemePrice,  
+                SchemePrice = request.SchemePrice,
             };
 
-            await _schemeCommandRepository.AddScheme(scheme);
+            await _schemeCommandRepository.AddScheme(scheme, request.EmployeeId);
             return Unit.Value;
         }
     }

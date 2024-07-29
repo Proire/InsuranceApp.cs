@@ -1,5 +1,6 @@
 ﻿using InsuranceAppRLL.CustomExceptions;
 using InsuranceAppRLL.Entities;
+using InsuranceAppRLL.Repositories.Interfaces.EmployeeSchemeRepository;
 using InsuranceAppRLL.Repositories.Interfaces.SchemeRepository;
 using Microsoft.Data.SqlClient;
 using System;
@@ -15,13 +16,15 @@ namespace InsuranceAppRLL.Repositories.Implementations.SchemeRepository
     public class SchemeCommandRepository : ISchemeCommandRepository
     {
         private readonly InsuranceDbContext _context;
+        private readonly IEmployeeSchemeCommandRepository _employeeSchemeCommand;
 
-        public SchemeCommandRepository(InsuranceDbContext context)
+        public SchemeCommandRepository(InsuranceDbContext context, IEmployeeSchemeCommandRepository employeeSchemeCommand)
         {
             _context = context;
+            _employeeSchemeCommand = employeeSchemeCommand;
         }
 
-        public async Task AddScheme(Scheme scheme)
+        public async Task AddScheme(Scheme scheme, int employeeId)
         {
             using (var transaction = _context.Database.BeginTransaction())
             {
@@ -38,6 +41,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.SchemeRepository
                     }
 
                     await _context.Schemes.AddAsync(scheme);
+                    await _employeeSchemeCommand.AddSchemeToEmployee(scheme.SchemeID, employeeId);
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
                 }
@@ -97,6 +101,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.SchemeRepository
                     }
 
                     _context.Schemes.Remove(scheme);
+                    await _employeeSchemeCommand.DeleteSchemeFromEmployees(schemeId);
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
                 }

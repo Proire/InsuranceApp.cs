@@ -23,8 +23,11 @@ namespace InsuranceAppRLL.CQRS.Commands.SchemeCommands
         [Required]
         public int SchemeTenure { get; set; }
 
+        [Required]
+        public int EmployeeId { get; set; }
 
-        public InsertSchemeCommand(string schemeName, string schemeDetails, int planId, double schemePrice, double schemeCover, int schemeTenure)
+
+        public InsertSchemeCommand(string schemeName, string schemeDetails, int planId, double schemePrice, double schemeCover, int schemeTenure, int employeeId)
         {
             SchemeName = schemeName;
             SchemeDetails = schemeDetails;
@@ -32,6 +35,7 @@ namespace InsuranceAppRLL.CQRS.Commands.SchemeCommands
             SchemePrice = schemePrice;
             SchemeCover = schemeCover;
             SchemeTenure = schemeTenure;
+            EmployeeId = employeeId;
         }
     }
 }

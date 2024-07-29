@@ -9,7 +9,7 @@ namespace InsuranceAppRLL.Repositories.Interfaces.SchemeRepository
 {
     public interface ISchemeCommandRepository
     {
-        Task AddScheme(Scheme scheme);
+        Task AddScheme(Scheme scheme, int employeeId);
         Task UpdateScheme(Scheme scheme);
         Task DeleteScheme(int schemeId);
     }
