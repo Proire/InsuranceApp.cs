@@ -40,7 +40,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.PaymentRepository
         {
             try
             {
-                var payments = await _context.Payments.Where(p => p.PolicyID == policyId).ToListAsync();
+                var payments = await _context.Payments.Where(p => p.PolicyID == policyId).OrderBy(p=>p.CreatedAt).ToListAsync();
                 if (!payments.Any())
                 {
                     throw new PaymentException("Policy do not have any payments");

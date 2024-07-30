@@ -2,6 +2,7 @@
 using InsuranceAppRLL.Entities;
 using InsuranceAppRLL.Repositories.Interfaces.PolicyRepository;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,18 +26,21 @@ namespace InsuranceAppRLL.Repositories.Implementations.PolicyRepository
             {
                 try
                 {
-                    if (_context.Policies.Any(p => p.PolicyDetails.Equals(policy.PolicyDetails) && p.CustomerID == policy.CustomerID && p.SchemeID == policy.SchemeID))
-                    {
-                        throw new PolicyException("Policy with the specified details already exists for this customer");
-                    }
-                    
+                    var customerIDParam = new SqlParameter("@CustomerID", policy.CustomerID);
+                    var schemeIDParam = new SqlParameter("@SchemeID", policy.SchemeID);
+
+                    await _context.Database.ExecuteSqlRawAsync(
+                        "EXEC CheckPolicyExists @CustomerID, @SchemeID",
+                        customerIDParam, schemeIDParam);
+
                     await _context.Policies.AddAsync(policy);
                     await _context.SaveChangesAsync();
+
                     await transaction.CommitAsync();
                 }
                 catch (SqlException)
                 {
-                    transaction.Rollback();
+                    await transaction.RollbackAsync();
                     throw;
                 }
             }

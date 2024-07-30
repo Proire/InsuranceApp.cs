@@ -44,6 +44,9 @@ namespace InsuranceAppRLL.Entities
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        
+        public string PolicyStatus { get; set; } = "Inactive";
+
         // Navigation property - one policy have many commissions
         public virtual ICollection<Commission> Commissions { get; set; }
 

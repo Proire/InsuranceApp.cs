@@ -30,7 +30,7 @@ namespace InsuranceAppRLL.Entities
         public double Amount { get; set; }
 
         [Required]
-        public DateTime PaymentDate { get; set; }
+        public DateTime PaymentDate { get; set; }  //dont use this
 
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
