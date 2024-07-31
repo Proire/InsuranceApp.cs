@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using InsuranceAppRLL.Entities;
+using Microsoft.Data.SqlClient;
 
 namespace InsuranceAppRLL
 {
@@ -20,6 +21,310 @@ namespace InsuranceAppRLL
             : base(options)
         {
         }
+
+        // Admin methods 
+        public async Task RegisterAdminAsync(Admin admin)
+        {
+            var usernameParam = new SqlParameter("@Username", admin.Username);
+            var passwordParam = new SqlParameter("@Password", admin.Password);
+            var emailParam = new SqlParameter("@Email", admin.Email);
+            var fullNameParam = new SqlParameter("@FullName", admin.FullName);
+            var createdAtParam = new SqlParameter("@CreatedAt", admin.CreatedAt);
+
+            // Execute the stored procedure
+            await Database.ExecuteSqlRawAsync(
+                "EXEC RegisterAdmin @Username, @Password, @Email, @FullName, @CreatedAt",
+                usernameParam, passwordParam, emailParam, fullNameParam, createdAtParam
+            );
+        }
+
+        public async Task UpdateAdminAsync(Admin admin)
+        {
+            var adminIdParam = new SqlParameter("@AdminID", admin.AdminID);
+            var usernameParam = new SqlParameter("@Username", admin.Username);
+            var passwordParam = new SqlParameter("@Password", admin.Password);
+            var emailParam = new SqlParameter("@Email", admin.Email);
+            var fullNameParam = new SqlParameter("@FullName", admin.FullName);
+            var createdAtParam = new SqlParameter("@CreatedAt", admin.CreatedAt);
+
+            // Execute the stored procedure
+            await Database.ExecuteSqlRawAsync(
+                "EXEC UpdateAdmin @AdminID, @Username, @Password, @Email, @FullName, @CreatedAt",
+                adminIdParam, usernameParam, passwordParam, emailParam, fullNameParam, createdAtParam
+            );
+        }
+
+        public async Task DeleteAdminAsync(int adminId)
+        {
+            var adminIdParam = new SqlParameter("@AdminID", adminId);
+
+            // Execute the stored procedure to delete the admin
+            await Database.ExecuteSqlRawAsync(
+                "EXEC DeleteAdmin @AdminID",
+                adminIdParam
+            );
+        }
+
+        public async Task<Admin> GetAdminByIdAsync(int adminId)
+        {
+            var adminIdParam = new SqlParameter("@AdminID", adminId);
+
+            var result = await Admins
+                .FromSqlRaw("EXEC GetAdminById @AdminID", adminIdParam)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return result.FirstOrDefault();
+        }
+
+        public async Task<IEnumerable<Admin>> GetAllAdminsAsync()
+        {
+            var result = await Admins
+                .FromSqlRaw("EXEC GetAllAdmins")
+                .AsNoTracking()
+                .ToListAsync();
+
+            return result;
+        }
+
+        // Employees
+        public async Task RegisterEmployeeAsync(Employee employee)
+        {
+            var parameters = new[]
+            {
+            new SqlParameter("@Username", employee.Username),
+            new SqlParameter("@Password", employee.Password),
+            new SqlParameter("@Email", employee.Email),
+            new SqlParameter("@FullName", employee.FullName),
+            new SqlParameter("@Role", employee.Role),
+            new SqlParameter("@CreatedAt", employee.CreatedAt)
+            };
+
+            await Database.ExecuteSqlRawAsync("EXEC RegisterEmployee @Username, @Password, @Email, @FullName, @Role, @CreatedAt", parameters);
+        }
+
+        public async Task UpdateEmployeeAsync(Employee employee)
+        {
+            var parameters = new[]
+            {
+            new SqlParameter("@EmployeeID", employee.EmployeeID),
+            new SqlParameter("@Username", employee.Username),
+            new SqlParameter("@Password", employee.Password),
+            new SqlParameter("@Email", employee.Email),
+            new SqlParameter("@FullName", employee.FullName),
+            new SqlParameter("@Role", employee.Role)
+            };
+
+            await Database.ExecuteSqlRawAsync("EXEC UpdateEmployee @EmployeeID, @Username, @Password, @Email, @FullName, @Role", parameters);
+        }
+
+        public async Task DeleteEmployeeAsync(int employeeId)
+        {
+            var parameter = new SqlParameter("@EmployeeID", employeeId);
+            await Database.ExecuteSqlRawAsync("EXEC DeleteEmployee @EmployeeID", parameter);
+        }
+
+        public async Task<Employee> GetEmployeeByIdAsync(int employeeId)
+        {
+            var parameter = new SqlParameter("@EmployeeID", employeeId);
+            return await Employees.FromSqlRaw("EXEC GetEmployeeById @EmployeeID", parameter).FirstOrDefaultAsync();
+        }
+
+        public async Task<List<Employee>> GetAllEmployeesAsync()
+        {
+            return await Employees.FromSqlRaw("EXEC GetAllEmployees").ToListAsync();
+        }
+
+        // customers 
+        public async Task RegisterCustomerAsync(string fullName, string email, string password, string phone, DateTime dateOfBirth, int? agentID)
+        {
+            await Database.ExecuteSqlRawAsync("EXEC RegisterCustomer @p0, @p1, @p2, @p3, @p4, @p5",
+                fullName, email, password, phone, dateOfBirth, agentID);
+        }
+
+        public async Task UpdateCustomerAsync(int customerID, string fullName, string email, string password, string phone, DateTime dateOfBirth, int? agentID)
+        {
+            await Database.ExecuteSqlRawAsync("EXEC UpdateCustomer @p0, @p1, @p2, @p3, @p4, @p5, @p6",
+                customerID, fullName, email, password, phone, dateOfBirth, agentID);
+        }
+
+        public async Task DeleteCustomerAsync(int customerID)
+        {
+            await Database.ExecuteSqlRawAsync("EXEC DeleteCustomer @p0", customerID);
+        }
+
+        // Method to call stored procedure for fetching a customer by ID
+        public async Task<Customer> GetCustomerByIdAsync(int customerId)
+        {
+            return await Customers
+                .FromSqlRaw("EXEC GetCustomerById @CustomerID", new SqlParameter("@CustomerID", customerId))
+                .SingleOrDefaultAsync();
+        }
+
+        // Method to call stored procedure for fetching all customers
+        public async Task<IEnumerable<Customer>> GetAllCustomersAsync()
+        {
+            return await Customers
+                .FromSqlRaw("EXEC GetAllCustomers")
+                .ToListAsync();
+        }
+
+        // Method to call stored procedure for fetching customers by agent ID
+        public async Task<IEnumerable<Customer>> GetCustomersByAgentIdAsync(int agentId)
+        {
+            return await Customers
+                .FromSqlRaw("EXEC GetCustomersByAgentId @AgentID", new SqlParameter("@AgentID", agentId))
+                .ToListAsync();
+        }
+
+        // agents 
+        public async Task RegisterInsuranceAgentAsync(InsuranceAgent agent)
+        {
+            var parameters = new[]
+            {
+            new SqlParameter("@Username", agent.Username),
+            new SqlParameter("@Password", agent.Password),
+            new SqlParameter("@Email", agent.Email),
+            new SqlParameter("@FullName", agent.FullName),
+        };
+
+            await Database.ExecuteSqlRawAsync("EXEC RegisterInsuranceAgent @Username, @Password, @Email, @FullName", parameters);
+        }
+
+        public async Task DeleteAgentAsync(int agentId)
+        {
+            var parameter = new SqlParameter("@AgentID", agentId);
+            await Database.ExecuteSqlRawAsync("EXEC DeleteInsuranceAgent @AgentID", parameter);
+        }
+
+        public async Task UpdateAgentAsync(InsuranceAgent agent)
+        {
+            var parameters = new[]
+            {
+            new SqlParameter("@AgentID", agent.AgentID),
+            new SqlParameter("@Username", agent.Username),
+            new SqlParameter("@Password", agent.Password),
+            new SqlParameter("@Email", agent.Email),
+            new SqlParameter("@FullName", agent.FullName),
+        };
+
+            await Database.ExecuteSqlRawAsync("EXEC UpdateInsuranceAgent @AgentID, @Username, @Password, @Email, @FullName", parameters);
+        }
+
+        public async Task<InsuranceAgent> GetAgentByIDAsync(int agentId)
+        {
+            var parameter = new SqlParameter("@AgentID", agentId);
+            var agent = await InsuranceAgents.FromSqlRaw("EXEC GetInsuranceAgentByID @AgentID", parameter).SingleOrDefaultAsync();
+            return agent;
+        }
+
+        public async Task<IEnumerable<InsuranceAgent>> GetAllAsync()
+        {
+            return await InsuranceAgents.FromSqlRaw("EXEC GetAllInsuranceAgents").ToListAsync();
+        }
+
+        // commission 
+        public async Task<double> GetTotalCommissionForAgentAsync(int agentId)
+        {
+            var parameter = new SqlParameter("@AgentID", agentId);
+            var totalCommission = await Database.ExecuteSqlRawAsync("EXEC GetTotalCommissionForAgent @AgentID", parameter);
+
+            if (totalCommission == null)
+            {
+                return 0;
+            }
+
+            return totalCommission;
+        }
+
+        // Employee scheme 
+        public async Task AddSchemeToEmployeeAsync(int schemeId, int employeeId)
+        {
+            var parameters = new[]
+            {
+            new SqlParameter("@SchemeID", schemeId),
+            new SqlParameter("@EmployeeID", employeeId)
+        };
+
+            await Database.ExecuteSqlRawAsync("EXEC AddSchemeToEmployee @SchemeID, @EmployeeID", parameters);
+        }
+
+        public async Task DeleteEmployeeFromSchemeAsync(int employeeId)
+        {
+            var parameter = new SqlParameter("@EmployeeID", employeeId);
+            await Database.ExecuteSqlRawAsync("EXEC DeleteEmployeeFromScheme @EmployeeID", parameter);
+        }
+
+        public async Task DeleteSchemeFromEmployeesAsync(int schemeId)
+        {
+            var parameter = new SqlParameter("@SchemeID", schemeId);
+            await Database.ExecuteSqlRawAsync("EXEC DeleteSchemeFromEmployees @SchemeID", parameter);
+        }
+
+        // insurance plan 
+        public async Task<int> AddInsurancePlanAsync(string planName, string planDetails)
+        {
+            var planIdParam = new SqlParameter
+            {
+                ParameterName = "@PlanID",
+                SqlDbType = System.Data.SqlDbType.Int,
+                Direction = System.Data.ParameterDirection.Output
+            };
+
+            var parameters = new[]
+            {
+            new SqlParameter("@PlanName", planName),
+            new SqlParameter("@PlanDetails", planDetails),
+            planIdParam
+        };
+
+            await Database.ExecuteSqlRawAsync("EXEC AddInsurancePlan @PlanID OUTPUT, @PlanName, @PlanDetails", parameters);
+
+            return (int)planIdParam.Value;
+        }
+
+        public async Task DeleteInsurancePlanAsync(int planId)
+        {
+            var parameter = new SqlParameter("@PlanID", planId);
+            await Database.ExecuteSqlRawAsync("EXEC DeleteInsurancePlan @PlanID", parameter);
+        }
+
+        public async Task UpdateInsurancePlanAsync(int planId, string planName, string planDetails)
+        {
+            var parameters = new[]
+            {
+            new SqlParameter("@PlanID", planId),
+            new SqlParameter("@PlanName", planName),
+            new SqlParameter("@PlanDetails", planDetails)
+        };
+
+            await Database.ExecuteSqlRawAsync("EXEC UpdateInsurancePlan @PlanID, @PlanName, @PlanDetails", parameters);
+        }
+
+        public async Task<List<InsurancePlan>> GetAllInsurancePlansAsync()
+        {
+            return await InsurancePlans.FromSqlRaw("EXEC GetAllInsurancePlans").ToListAsync();
+        }
+
+        public async Task<InsurancePlan> GetInsurancePlanByIdAsync(int planId)
+        {
+            var parameter = new SqlParameter("@PlanID", planId);
+            return await InsurancePlans.FromSqlRaw("EXEC GetInsurancePlanById @PlanID", parameter).SingleOrDefaultAsync();
+        }
+
+        // payments 
+        public async Task AddPaymentAsync(int customerId, int policyId, double amount)
+        {
+            var parameters = new[]
+            {
+            new SqlParameter("@CustomerID", customerId),
+            new SqlParameter("@PolicyID", policyId),
+            new SqlParameter("@Amount", amount)
+            };
+
+            await Database.ExecuteSqlRawAsync("EXEC AddPayment @CustomerID, @PolicyID, @Amount", parameters);
+        }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

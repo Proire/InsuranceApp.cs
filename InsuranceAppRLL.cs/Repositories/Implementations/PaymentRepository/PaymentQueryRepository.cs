@@ -23,16 +23,23 @@ namespace InsuranceAppRLL.Repositories.Implementations.PaymentRepository
         {
             try
             {
-                var payments =  await _context.Payments.Where(p=>p.CustomerID== customerId).ToListAsync();
-                if(!payments.Any() )
+                var parameter = new SqlParameter("@CustomerID", customerId);
+                var payments = await _context.Payments.FromSqlRaw("EXEC GetPaymentsForCustomer @CustomerID", parameter).ToListAsync();
+
+                if (!payments.Any())
                 {
-                    throw new PaymentException("Customer does not have any payments");
+                    throw new PaymentException("Customer does not have any payments.");
                 }
+
                 return payments;
             }
             catch (SqlException ex)
             {
-                throw ex;
+                throw new PaymentException("An error occurred while retrieving payments for the customer.", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new PaymentException("An unexpected error occurred while retrieving payments for the customer.", ex);
             }
         }
 
@@ -40,16 +47,23 @@ namespace InsuranceAppRLL.Repositories.Implementations.PaymentRepository
         {
             try
             {
-                var payments = await _context.Payments.Where(p => p.PolicyID == policyId).OrderBy(p=>p.CreatedAt).ToListAsync();
+                var parameter = new SqlParameter("@PolicyID", policyId);
+                var payments = await _context.Payments.FromSqlRaw("EXEC GetPaymentsForPolicy @PolicyID", parameter).ToListAsync();
+
                 if (!payments.Any())
                 {
-                    throw new PaymentException("Policy do not have any payments");
+                    throw new PaymentException("Policy does not have any payments.");
                 }
+
                 return payments;
             }
             catch (SqlException ex)
             {
-                throw ex;
+                throw new PaymentException("An error occurred while retrieving payments for the policy.", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new PaymentException("An unexpected error occurred while retrieving payments for the policy.", ex);
             }
         }
     }

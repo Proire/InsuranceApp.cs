@@ -15,75 +15,62 @@ namespace InsuranceAppRLL.Repositories.Implementations.InsurancePlanRepository
         }
         public async Task AddPlan(InsurancePlan plan)
         {
-            using(var transaction = _context.Database.BeginTransaction())
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                try
-                {
-                    if(_context.InsurancePlans.Any(p=>p.PlanName.Equals(plan.PlanName)))
-                    {
-                        throw new InsurancePlanException("Plan with the Specified Name already exists");
-                    }
-                    await _context.InsurancePlans.AddAsync(plan);
-                    await _context.SaveChangesAsync();
-                    await transaction.CommitAsync();
-                }
-                catch(SqlException)
-                {
-                    transaction.Rollback();
-                    throw;
-                }
+                int planId = await _context.AddInsurancePlanAsync(plan.PlanName, plan.PlanDetails);
+                plan.PlanID = planId;
+                await transaction.CommitAsync();
+            }
+            catch (SqlException ex)
+            {
+                await transaction.RollbackAsync();
+                throw new InsurancePlanException("An error occurred while adding the plan.", ex);
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                throw new InsurancePlanException("An unexpected error occurred.", ex);
             }
         }
 
         public async Task DeletePlan(int planId)
         {
-            using (var transaction = _context.Database.BeginTransaction())
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                try
-                {
-                    var plan = await _context.InsurancePlans.FindAsync(planId);
-                    if (plan == null)
-                    {
-                        throw new InsurancePlanException("Plan with the specified Id already deleted or does not Exists");
-                    }
-                    _context.InsurancePlans.Remove(plan);
-                    await _context.SaveChangesAsync();
-                    await transaction.CommitAsync();
-                }
-                catch (SqlException)
-                {
-                    transaction.Rollback();
-                    throw;
-                }
+                await _context.DeleteInsurancePlanAsync(planId);
+                await transaction.CommitAsync();
+            }
+            catch (SqlException ex)
+            {
+                await transaction.RollbackAsync();
+                throw new InsurancePlanException("An error occurred while deleting the plan.", ex);
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                throw new InsurancePlanException("An unexpected error occurred.", ex);
             }
         }
 
         public async Task UpdatePlan(InsurancePlan plan)
         {
-            using (var transaction = _context.Database.BeginTransaction())
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                try
-                {
-                    var plancheck = await _context.InsurancePlans.FindAsync(plan.PlanID);
-                    if (plancheck == null)
-                    {
-                        throw new InsurancePlanException("Plan with the specified Id does not Exists");
-                    }
-                    if (plancheck.PlanName.Equals(plan.PlanName))
-                    {
-                        throw new InsurancePlanException("Plan with the specified Name already Exists");
-                    }
-                    plancheck.PlanName = plan.PlanName;
-                    plancheck.PlanDetails = plan.PlanDetails;   
-                    _context.InsurancePlans.Update(plancheck);
-                    await _context.SaveChangesAsync();
-                    await transaction.CommitAsync();
-                }
-                catch (SqlException)
-                {
-                    transaction.Rollback();
-                    throw;
-                }
+                await _context.UpdateInsurancePlanAsync(plan.PlanID, plan.PlanName, plan.PlanDetails);
+                await transaction.CommitAsync();
+            }
+            catch (SqlException ex)
+            {
+                await transaction.RollbackAsync();
+                throw new InsurancePlanException("An error occurred while updating the plan.", ex);
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                throw new InsurancePlanException("An unexpected error occurred.", ex);
             }
         }
     }

@@ -5,16 +5,9 @@ using InsuranceAppRLL.Repositories.Interfaces.AdminRepository;
 using InsuranceAppRLL.Utilities;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using UserModelLayer;
-using UserRLL.Utilities;
 
 namespace InsuranceAppRLL.Repositories.Implementations.AdminRepository
 {
@@ -31,32 +24,51 @@ namespace InsuranceAppRLL.Repositories.Implementations.AdminRepository
 
         public async Task DeleteAdminAsync(int adminId)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            Admin admin = null;
+
             try
             {
-                var admin = await _context.Admins.FindAsync(adminId);
-                if (admin != null)
+                admin = await _context.Admins.FindAsync(adminId);
+                if (admin == null)
                 {
-                    _context.Admins.Remove(admin);
-                    await _context.SaveChangesAsync();
-                    // Store the key and IV in a file or secure storage
-                    KeyIvManager.DeleteKeyAndIv(admin.Email);
+                    throw new AdminException("Admin not found");
                 }
-                else
-                {
-                    throw new AdminException($"Admin Not found");
-                }
+
+                // Call the DbContext method to execute the stored procedure for deleting the admin
+                await _context.DeleteAdminAsync(adminId);
+
+                // Remove the admin entity from the context
+                _context.Admins.Remove(admin);
+
+                // Save changes to the database
+                await _context.SaveChangesAsync();
+
+                // Commit the transaction
+                await transaction.CommitAsync();
+
+                // Delete the key and IV from storage
+                KeyIvManager.DeleteKeyAndIv(admin.Email);
             }
-            catch (SqlException ex)
+            catch (Exception ex)
             {
-                // Handle specific database update exceptions
-                throw new AdminException("An error occurred while deleting the admin from the database.", ex);
+                // Rollback the transaction if any exception occurs
+                await transaction.RollbackAsync();
+
+                // Handle specific database exceptions
+                if (ex is SqlException)
+                {
+                    throw new AdminException("An error occurred while deleting the admin from the database.", ex);
+                }
+
+                throw; // Re-throw other exceptions
             }
         }
 
 
         public async Task RegisterAdminAsync(Admin admin)
         {
-
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 // Check if an admin with the same email already exists
@@ -66,6 +78,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.AdminRepository
                 }
 
                 string password = admin.Password;
+
                 // Generate a unique key and IV for the admin
                 using (var aes = System.Security.Cryptography.Aes.Create())
                 {
@@ -77,13 +90,15 @@ namespace InsuranceAppRLL.Repositories.Implementations.AdminRepository
                     // Store the key and IV in a file or secure storage
                     KeyIvManager.SaveKeyAndIv(admin.Email, key, iv);
 
-
                     // Hash the admin's password using the generated key and IV
                     admin.Password = PasswordHasher.HashPassword(admin.Password, key, iv);
                 }
 
-                await _context.Admins.AddAsync(admin);
-                await _context.SaveChangesAsync();
+                // Call the DbContext method to execute the stored procedure
+                await _context.RegisterAdminAsync(admin);
+
+                // Commit the transaction
+                await transaction.CommitAsync();
 
                 // Send confirmation email with credentials using RabbitMQ
                 var emailDto = new EmailDTO
@@ -96,34 +111,47 @@ namespace InsuranceAppRLL.Repositories.Implementations.AdminRepository
                 string message = JsonSerializer.Serialize(emailDto);
                 _rabbitMqService.SendMessage(message);
             }
-            catch (SqlException ex)
+            catch (Exception ex)
             {
+                // Rollback the transaction if any exception occurs
+                await transaction.RollbackAsync();
+                KeyIvManager.DeleteKeyAndIv(admin.Email);
                 // Handle specific database update exceptions
-                throw new AdminException("An error occurred while registering the admin.", ex);
+                if (ex is SqlException)
+                {
+                    throw new AdminException("An error occurred while registering the admin.", ex);
+                }
+
+                throw; // Re-throw other exceptions
             }
         }
 
         public async Task UpdateAdminAsync(Admin admin)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            Admin existingAdmin = null;
+
             try
             {
-                
-                var existingAdmin = await _context.Admins.FindAsync(admin.AdminID);
+                existingAdmin = await _context.Admins.FindAsync(admin.AdminID);
                 if (existingAdmin == null)
                 {
-                    throw new AdminException($"Admin Not found");
+                    throw new AdminException("Admin not found");
                 }
+
                 // Check if an admin with the same email already exists
                 if (await _context.Admins.AnyAsync(a => a.AdminID != admin.AdminID && a.Email == admin.Email))
                 {
                     throw new AdminException("An admin with this email already exists.");
                 }
 
-
                 existingAdmin.Username = admin.Username;
                 existingAdmin.FullName = admin.FullName;
 
-                if(existingAdmin.Email != admin.Email)
+                bool emailUpdated = existingAdmin.Email != admin.Email;
+                bool passwordUpdated = existingAdmin.Password != admin.Password;
+
+                if (emailUpdated)
                 {
                     // Generate a unique key and IV for the admin
                     using (var aes = System.Security.Cryptography.Aes.Create())
@@ -136,10 +164,9 @@ namespace InsuranceAppRLL.Repositories.Implementations.AdminRepository
                         // Store the key and IV in a file or secure storage
                         KeyIvManager.SaveKeyAndIv(admin.Email, key, iv);
 
-
                         // Hash the admin's password using the generated key and IV
                         existingAdmin.Password = PasswordHasher.HashPassword(admin.Password, key, iv);
-                        existingAdmin.Email = admin.Email;  
+                        existingAdmin.Email = admin.Email;
                     }
 
                     // Send confirmation email with credentials using RabbitMQ
@@ -147,16 +174,15 @@ namespace InsuranceAppRLL.Repositories.Implementations.AdminRepository
                     {
                         To = admin.Email,
                         Subject = "Admin Registration Confirmation",
-                        Body = $"Dear {admin.FullName},\n\nYour admin account has been successfully Verified .\n\nYour login credentials are:\nEmail: {admin.Email}\nPassword: {admin.Password}.\n\nBest regards,\nInsuranceApp Team"
+                        Body = $"Dear {admin.FullName},\n\nYour admin account has been successfully verified.\n\nYour login credentials are:\nEmail: {admin.Email}\nPassword: {admin.Password}.\n\nBest regards,\nInsuranceApp Team"
                     };
 
                     string message = JsonSerializer.Serialize(emailDto);
                     _rabbitMqService.SendMessage(message);
                 }
 
-                if (existingAdmin.Password != admin.Password)
+                if (passwordUpdated && !emailUpdated)
                 {
-
                     // Generate a unique key and IV for the user
                     using (Aes aes = Aes.Create())
                     {
@@ -165,25 +191,33 @@ namespace InsuranceAppRLL.Repositories.Implementations.AdminRepository
                         byte[] key = aes.Key;
                         byte[] iv = aes.IV;
 
-
                         // Store the key and IV in a file
                         KeyIvManager.UpdateKeyAndIv(admin.Email, key, iv);
 
                         // Hash the user's password using the generated key and IV
                         existingAdmin.Password = PasswordHasher.HashPassword(admin.Password, key, iv);
-
                     }
                 }
 
-                _context.Admins.Update(existingAdmin);
+                await _context.UpdateAdminAsync(existingAdmin);
                 await _context.SaveChangesAsync();
+
+                // Commit the transaction
+                await transaction.CommitAsync();
             }
-            catch (SqlException ex)
+            catch (Exception ex)
             {
+                // Rollback the transaction if any exception occurs
+                await transaction.RollbackAsync();
+
                 // Handle specific database update exceptions
-                throw new AdminException("An error occurred while updating the admin in the database.", ex);
+                if (ex is SqlException)
+                {
+                    throw new AdminException("An error occurred while updating the admin in the database.", ex);
+                }
+
+                throw; // Re-throw other exceptions
             }
         }
-
     }
 }
