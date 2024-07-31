@@ -4,6 +4,7 @@ using InsuranceAppBLL.EmployeeService;
 using InsuranceAppBLL.InsuranceAgentService;
 using InsuranceAppBLL.InsurancePlanService;
 using InsuranceAppBLL.LoginService;
+using InsuranceAppBLL.PaymentService;
 using InsuranceAppBLL.PolicyService;
 using InsuranceAppBLL.SchemeService;
 using InsuranceAppRLL;
@@ -63,6 +64,20 @@ namespace InsuranceApp.cs
             //    });
             //});
 
+            // CORS Policy
+            var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy(name: MyAllowSpecificOrigins,
+                                  policy =>
+                                  {
+                                      policy.WithOrigins("https://learn.microsoft.com")  // Allow any origin for testing purposes
+                                        .AllowAnyHeader()
+                                        .AllowAnyMethod();
+                                  });
+            });
+
             builder.Services.AddControllers();
             builder.Services.AddDbContext<InsuranceDbContext>(options => options.UseSqlServer(Environment.GetEnvironmentVariable("InsuranceDbConnection") ?? string.Empty));
 
@@ -92,6 +107,7 @@ namespace InsuranceApp.cs
             
             builder.Services.AddScoped<IEmployeeSchemeCommandRepository, EmployeeSchemeCommandRepository>();
 
+            builder.Services.AddScoped<IPaymentCommandRepository, PaymentCommandRepository>();
             builder.Services.AddScoped<IPaymentQueryRepository, PaymentQueryRepository>();
 
             builder.Services.AddScoped<ICommissionQueryRepository, CommissionQueryRepository>();
@@ -105,6 +121,7 @@ namespace InsuranceApp.cs
             builder.Services.AddScoped<ILoginService, LoginService>(); 
             builder.Services.AddScoped<ISchemeService, SchemeService>();
             builder.Services.AddScoped<IPolicyService, PolicyService>();
+            builder.Services.AddScoped<IPaymentService, PaymentService>();  
 
             // Mediator service
             builder.Services.AddMediatR(typeof(Program).Assembly);
@@ -217,8 +234,9 @@ namespace InsuranceApp.cs
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
 
+            app.UseHttpsRedirection();
+            app.UseCors(MyAllowSpecificOrigins);
             app.UseAuthentication();
             app.UseAuthorization();
 
