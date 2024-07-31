@@ -28,74 +28,16 @@ namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
 
         public async Task RegisterCustomerAsync(Customer customer)
         {
-            try
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                if (await _context.Customers.AnyAsync(c => c.Email == customer.Email))
+                try
                 {
-                    throw new CustomerException("A customer with this email already exists.");
-                }
+                    if (await _context.Customers.AnyAsync(c => c.Email == customer.Email))
+                    {
+                        throw new CustomerException("A customer with this email already exists.");
+                    }
 
-                string password = customer.Password;
-                // Generate a unique key and IV for the customer
-                using (var aes = System.Security.Cryptography.Aes.Create())
-                {
-                    aes.GenerateKey();
-                    aes.GenerateIV();
-                    byte[] key = aes.Key;
-                    byte[] iv = aes.IV;
-
-                    // Store the key and IV in a file or secure storage
-                    KeyIvManager.SaveKeyAndIv(customer.Email, key, iv);
-
-                    // Hash the customer's password using the generated key and IV
-                    customer.Password = PasswordHasher.HashPassword(customer.Password, key, iv);
-                }
-
-                await _context.Customers.AddAsync(customer);
-                await _context.SaveChangesAsync();
-
-                // Send confirmation email with credentials using RabbitMQ
-                var emailDto = new EmailDTO
-                {
-                    To = customer.Email,
-                    Subject = "Customer Registration Confirmation",
-                    Body = $"Dear {customer.FullName},\n\nYour customer account has been successfully created.\n\nYour login credentials are:\nEmail: {customer.Email}\nPassword: {password}.\n\nBest regards,\nInsuranceApp Team"
-                };
-
-                string message = JsonSerializer.Serialize(emailDto);
-                _rabbitMqService.SendMessage(message);
-            }
-            catch (SqlException ex)
-            {
-                // Handle specific database update exceptions
-                throw new CustomerException("An error occurred while registering the customer.", ex);
-            }
-        }
-
-        public async Task UpdateCustomerAsync(Customer customer)
-        {
-            try
-            {
-                // Find the existing customer
-                var existingCustomer = await _context.Customers.FindAsync(customer.CustomerID);
-                if (existingCustomer == null)
-                {
-                    throw new CustomerException($"Customer Not found");
-                }
-                if (await _context.Customers.AnyAsync(c => c.CustomerID != customer.CustomerID && c.Email == customer.Email))
-                {
-                    throw new CustomerException("A customer with this email already exists.");
-                }
-
-                // Update customer details
-                existingCustomer.FullName = customer.FullName;
-                existingCustomer.Phone = customer.Phone;
-                existingCustomer.DateOfBirth = customer.DateOfBirth;
-
-                // Check if email has changed
-                if (existingCustomer.Email != customer.Email)
-                {
-                    // Generate and store new key and IV
+                    string password = customer.Password;
                     using (var aes = System.Security.Cryptography.Aes.Create())
                     {
                         aes.GenerateKey();
@@ -104,74 +46,130 @@ namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
                         byte[] iv = aes.IV;
 
                         KeyIvManager.SaveKeyAndIv(customer.Email, key, iv);
-
-                        // Hash the new password
-                        existingCustomer.Password = PasswordHasher.HashPassword(customer.Password, key, iv);
-                        existingCustomer.Email = customer.Email;
+                        customer.Password = PasswordHasher.HashPassword(customer.Password, key, iv);
                     }
 
-                    // Send confirmation email with credentials using RabbitMQ
+                    await _context.RegisterCustomerAsync(customer.FullName, customer.Email, customer.Password, customer.Phone, customer.DateOfBirth, customer.AgentID);
+
                     var emailDto = new EmailDTO
                     {
                         To = customer.Email,
-                        Subject = "Admin Registration Confirmation",
-                        Body = $"Dear {customer.FullName},\n\nYour admin account has been successfully created.\n\nYour login credentials are:\nEmail: {customer.Email}\nPassword: {customer.Password}.\n\nBest regards,\nInsuranceApp Team"
+                        Subject = "Customer Registration Confirmation",
+                        Body = $"Dear {customer.FullName},\n\nYour customer account has been successfully created.\n\nYour login credentials are:\nEmail: {customer.Email}\nPassword: {password}.\n\nBest regards,\nInsuranceApp Team"
                     };
 
                     string message = JsonSerializer.Serialize(emailDto);
                     _rabbitMqService.SendMessage(message);
+
+                    await transaction.CommitAsync();
                 }
-                else if (existingCustomer.Password != customer.Password)
+                catch (Exception ex)
                 {
-                    // Generate and store new key and IV for password change
-                    using (var aes = System.Security.Cryptography.Aes.Create())
-                    {
-                        aes.GenerateKey();
-                        aes.GenerateIV();
-                        byte[] key = aes.Key;
-                        byte[] iv = aes.IV;
-
-                        KeyIvManager.UpdateKeyAndIv(customer.Email, key, iv);
-
-                        // Hash the new password
-                        existingCustomer.Password = PasswordHasher.HashPassword(customer.Password, key, iv);
-                    }
+                    await transaction.RollbackAsync();
+                    KeyIvManager.DeleteKeyAndIv(customer.Email);
+                    throw new CustomerException("An error occurred while registering the customer.", ex);
                 }
-
-                // Update customer in the context
-                _context.Customers.Update(existingCustomer);
-                await _context.SaveChangesAsync();
-            }
-            catch (SqlException ex)
-            {
-                // Handle specific database update exceptions
-                throw new CustomerException("An error occurred while updating the customer in the database.", ex);
             }
         }
+
+
+        public async Task UpdateCustomerAsync(Customer customer)
+        {
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var existingCustomer = await _context.Customers.FindAsync(customer.CustomerID);
+                    if (existingCustomer == null)
+                    {
+                        throw new CustomerException($"Customer Not found");
+                    }
+                    if (await _context.Customers.AnyAsync(c => c.CustomerID != customer.CustomerID && c.Email == customer.Email))
+                    {
+                        throw new CustomerException("A customer with this email already exists.");
+                    }
+
+                    existingCustomer.FullName = customer.FullName;
+                    existingCustomer.Phone = customer.Phone;
+                    existingCustomer.DateOfBirth = customer.DateOfBirth;
+
+                    if (existingCustomer.Email != customer.Email)
+                    {
+                        using (var aes = System.Security.Cryptography.Aes.Create())
+                        {
+                            aes.GenerateKey();
+                            aes.GenerateIV();
+                            byte[] key = aes.Key;
+                            byte[] iv = aes.IV;
+
+                            KeyIvManager.SaveKeyAndIv(customer.Email, key, iv);
+                            existingCustomer.Password = PasswordHasher.HashPassword(customer.Password, key, iv);
+                            existingCustomer.Email = customer.Email;
+                        }
+
+                        var emailDto = new EmailDTO
+                        {
+                            To = customer.Email,
+                            Subject = "Customer Registration Confirmation",
+                            Body = $"Dear {customer.FullName},\n\nYour customer account has been successfully created.\n\nYour login credentials are:\nEmail: {customer.Email}\nPassword: {customer.Password}.\n\nBest regards,\nInsuranceApp Team"
+                        };
+
+                        string message = JsonSerializer.Serialize(emailDto);
+                        _rabbitMqService.SendMessage(message);
+                    }
+                    else if (existingCustomer.Password != customer.Password)
+                    {
+                        using (var aes = System.Security.Cryptography.Aes.Create())
+                        {
+                            aes.GenerateKey();
+                            aes.GenerateIV();
+                            byte[] key = aes.Key;
+                            byte[] iv = aes.IV;
+
+                            KeyIvManager.UpdateKeyAndIv(customer.Email, key, iv);
+                            existingCustomer.Password = PasswordHasher.HashPassword(customer.Password, key, iv);
+                        }
+                    }
+
+                    await _context.UpdateCustomerAsync(customer.CustomerID, customer.FullName, customer.Email, customer.Password, customer.Phone, customer.DateOfBirth, customer.AgentID);
+
+                    await transaction.CommitAsync();
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    throw new CustomerException("An error occurred while updating the customer in the database.", ex);
+                }
+            }
+        }
+
 
         public async Task DeleteCustomerAsync(int customerId)
         {
-            try
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                // Find the existing customer
-                var customer = await _context.Customers.FindAsync(customerId);
-                if (customer != null)
+                try
                 {
-                    // Remove the customer
-                    _context.Customers.Remove(customer);
-                    await _context.SaveChangesAsync();
-                    KeyIvManager.DeleteKeyAndIv(customer.Email);
+                    var customer = await _context.Customers.FindAsync(customerId);
+                    if (customer != null)
+                    {
+                        await _context.DeleteCustomerAsync(customerId);
+                        KeyIvManager.DeleteKeyAndIv(customer.Email);
+                    }
+                    else
+                    {
+                        throw new CustomerException($"Customer Not found");
+                    }
+
+                    await transaction.CommitAsync();
                 }
-                else
+                catch (Exception ex)
                 {
-                    throw new CustomerException($"Customer Not found");
+                    await transaction.RollbackAsync();
+                    throw new CustomerException("An error occurred while deleting the customer from the database.", ex);
                 }
-            }
-            catch (SqlException ex)
-            {
-                // Handle specific database update exceptions
-                throw new CustomerException("An error occurred while deleting the customer from the database.", ex);
             }
         }
+
     }
 }

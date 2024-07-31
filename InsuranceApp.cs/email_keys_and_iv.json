@@ -8,5 +8,15 @@
     "Email": "emp@example.com",
     "Key": "S9eXURI90Qh8\u002BCdNesPaMwLQHg45RM7pbFS2r\u002BoWias=",
     "Iv": "\u002B47LnXXUGqClLQLMViRsHA=="
+  },
+  "admin@example.com": {
+    "Email": "admin@example.com",
+    "Key": "Pys/mCM/yOK/KQr9SOrKZC7cSfqdDanqh5boljSCtP8=",
+    "Iv": "6fnIfErTNpSqWHMNyRgbug=="
+  },
+  "admin@mail.com": {
+    "Email": "admin@mail.com",
+    "Key": "S2tmqBoRoO0SUccuuMplXI0SgAORpY4127tmHSYYrrM=",
+    "Iv": "Qntmhtmg7gpeHkW9BxNAnA=="
   }
 }

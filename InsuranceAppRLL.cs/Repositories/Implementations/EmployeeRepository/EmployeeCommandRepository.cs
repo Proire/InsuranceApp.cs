@@ -4,33 +4,29 @@ using InsuranceAppRLL.Entities;
 using InsuranceAppRLL.Repositories.Interfaces.EmployeeRepository;
 using InsuranceAppRLL.Repositories.Interfaces.EmployeeSchemeRepository;
 using InsuranceAppRLL.Utilities;
+using InsuranceAppRLL;
 using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
 using UserModelLayer;
+using System.Security.Cryptography;
+using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 
-namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
+public class EmployeeCommandRepository : IEmployeeCommandRepository
 {
-    public class EmployeeCommandRepository : IEmployeeCommandRepository
+    private readonly InsuranceDbContext _context;
+    private readonly RabitMQProducer _rabbitMqService;
+    private readonly IEmployeeSchemeCommandRepository _employeeSchemeCommand;
+
+    public EmployeeCommandRepository(InsuranceDbContext context, RabitMQProducer rabbitMqService, IEmployeeSchemeCommandRepository employeeSchemeCommand)
     {
-        private readonly InsuranceDbContext _context;
-        private readonly RabitMQProducer _rabbitMqService;
-        private readonly IEmployeeSchemeCommandRepository _employeeSchemeCommand;
+        _context = context;
+        _rabbitMqService = rabbitMqService;
+        _employeeSchemeCommand = employeeSchemeCommand;
+    }
 
-        public EmployeeCommandRepository(InsuranceDbContext context, RabitMQProducer rabbitMqService,IEmployeeSchemeCommandRepository employeeSchemeCommand)
-        {
-            _context = context;
-            _rabbitMqService = rabbitMqService;
-            _employeeSchemeCommand = employeeSchemeCommand;
-        }
-
-        public async Task RegisterEmployeeAsync(Employee employee)
+    public async Task RegisterEmployeeAsync(Employee employee)
+    {
+        using (var transaction = await _context.Database.BeginTransactionAsync())
         {
             try
             {
@@ -39,9 +35,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
                     throw new EmployeeException("An employee with this email already exists.");
                 }
 
-
                 string password = employee.Password;
-                // Generate a unique key and IV for the employee
                 using (var aes = System.Security.Cryptography.Aes.Create())
                 {
                     aes.GenerateKey();
@@ -49,17 +43,13 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
                     byte[] key = aes.Key;
                     byte[] iv = aes.IV;
 
-                    // Store the key and IV in a file or secure storage
                     KeyIvManager.SaveKeyAndIv(employee.Email, key, iv);
-
-                    // Hash the employee's password using the generated key and IV
                     employee.Password = PasswordHasher.HashPassword(employee.Password, key, iv);
                 }
 
-                await _context.Employees.AddAsync(employee);
-                await _context.SaveChangesAsync();
+                await _context.RegisterEmployeeAsync(employee);
+                await transaction.CommitAsync();
 
-                // Send confirmation email with credentials using RabbitMQ
                 var emailDto = new EmailDTO
                 {
                     To = employee.Email,
@@ -72,21 +62,25 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
             }
             catch (SqlException ex)
             {
-                // Handle specific database update exceptions
+                await transaction.RollbackAsync();
+                KeyIvManager.DeleteKeyAndIv(employee.Email);
                 throw new EmployeeException("An error occurred while registering the employee.", ex);
             }
         }
+    }
 
-        public async Task DeleteEmployeeAsync(int employeeId)
+    public async Task DeleteEmployeeAsync(int employeeId)
+    {
+        using (var transaction = await _context.Database.BeginTransactionAsync())
         {
             try
             {
                 var employee = await _context.Employees.FindAsync(employeeId);
                 if (employee != null)
                 {
-                    _context.Employees.Remove(employee);
+                    await _context.DeleteEmployeeAsync(employeeId);
                     await _employeeSchemeCommand.DeleteEmployeeFromScheme(employeeId);
-                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
                     KeyIvManager.DeleteKeyAndIv(employee.Email);
                 }
                 else
@@ -96,16 +90,18 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
             }
             catch (SqlException ex)
             {
-                // Handle specific database update exceptions
+                await transaction.RollbackAsync();
                 throw new EmployeeException("An error occurred while deleting the employee from the database.", ex);
             }
         }
+    }
 
-        public async Task UpdateEmployeeAsync(Employee employee)
+    public async Task UpdateEmployeeAsync(Employee employee)
+    {
+        using (var transaction = await _context.Database.BeginTransactionAsync())
         {
             try
             {
-
                 var existingEmployee = await _context.Employees.FindAsync(employee.EmployeeID);
                 if (existingEmployee == null)
                 {
@@ -121,7 +117,6 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
 
                 if (existingEmployee.Email != employee.Email)
                 {
-                    // Generate a unique key and IV for the employee
                     using (var aes = Aes.Create())
                     {
                         aes.GenerateKey();
@@ -129,15 +124,11 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
                         byte[] key = aes.Key;
                         byte[] iv = aes.IV;
 
-                        // Store the key and IV in a file or secure storage
                         KeyIvManager.SaveKeyAndIv(employee.Email, key, iv);
-
-                        // Hash the employee's password using the generated key and IV
                         existingEmployee.Password = PasswordHasher.HashPassword(employee.Password, key, iv);
                         existingEmployee.Email = employee.Email;
                     }
 
-                    // Send confirmation email with credentials using RabbitMQ
                     var emailDto = new EmailDTO
                     {
                         To = employee.Email,
@@ -151,7 +142,6 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
 
                 if (existingEmployee.Password != employee.Password)
                 {
-                    // Generate a unique key and IV for the employee
                     using (Aes aes = Aes.Create())
                     {
                         aes.GenerateKey();
@@ -159,20 +149,17 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
                         byte[] key = aes.Key;
                         byte[] iv = aes.IV;
 
-                        // Store the key and IV in a file
                         KeyIvManager.UpdateKeyAndIv(employee.Email, key, iv);
-
-                        // Hash the employee's password using the generated key and IV
                         existingEmployee.Password = PasswordHasher.HashPassword(employee.Password, key, iv);
                     }
                 }
 
-                _context.Employees.Update(existingEmployee);
-                await _context.SaveChangesAsync();
+                await _context.UpdateEmployeeAsync(existingEmployee);
+                await transaction.CommitAsync();
             }
             catch (SqlException ex)
             {
-                // Handle specific database update exceptions
+                await transaction.RollbackAsync();
                 throw new EmployeeException("An error occurred while updating the employee in the database.", ex);
             }
         }

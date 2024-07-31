@@ -21,21 +21,25 @@ namespace InsuranceAppRLL.Repositories.Implementations.PaymentRepository
         }
         public async Task AddPaymentAsync(Payment payment)
         {
-            using (var transaction = _context.Database.BeginTransaction())
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
                 try
                 {
-                    if (_context.Payments.Any(p => p.PolicyID == payment.PolicyID))
-                    {
+                    // Add payment using stored procedure
+                    await _context.AddPaymentAsync(payment.CustomerID, payment.PolicyID, payment.Amount);
 
-                    }
-                    await _context.SaveChangesAsync();
+                    // Commit transaction
                     await transaction.CommitAsync();
                 }
-                catch (SqlException)
+                catch (SqlException ex)
                 {
                     await transaction.RollbackAsync();
-                    throw;
+                    throw new PaymentException("An error occurred while adding the payment.", ex);
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    throw new PaymentException("An unexpected error occurred while adding the payment.", ex);
                 }
             }
         }

@@ -1,4 +1,5 @@
 using InsuranceAppBLL.AdminService;
+using InsuranceAppBLL.CommissionService;
 using InsuranceAppBLL.CustomerService;
 using InsuranceAppBLL.EmployeeService;
 using InsuranceAppBLL.InsuranceAgentService;
@@ -72,7 +73,7 @@ namespace InsuranceApp.cs
                 options.AddPolicy(name: MyAllowSpecificOrigins,
                                   policy =>
                                   {
-                                      policy.WithOrigins("https://learn.microsoft.com")  // Allow any origin for testing purposes
+                                      policy.WithOrigins("*")  // Allow any origin for testing purposes
                                         .AllowAnyHeader()
                                         .AllowAnyMethod();
                                   });
@@ -122,6 +123,7 @@ namespace InsuranceApp.cs
             builder.Services.AddScoped<ISchemeService, SchemeService>();
             builder.Services.AddScoped<IPolicyService, PolicyService>();
             builder.Services.AddScoped<IPaymentService, PaymentService>();  
+            builder.Services.AddScoped<ICommissionService, CommissionService>();
 
             // Mediator service
             builder.Services.AddMediatR(typeof(Program).Assembly);

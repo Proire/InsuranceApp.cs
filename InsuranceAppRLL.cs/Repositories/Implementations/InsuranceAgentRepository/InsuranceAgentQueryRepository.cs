@@ -19,7 +19,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.InsuranceAgentRepository
         {
             try
             {
-                var agent = await _context.InsuranceAgents.FindAsync(agentId);
+                var agent = await _context.GetAgentByIDAsync(agentId);
                 if (agent == null)
                 {
                     throw new InsuranceAgentException($"No insurance agent found with id: {agentId}");
@@ -32,13 +32,12 @@ namespace InsuranceAppRLL.Repositories.Implementations.InsuranceAgentRepository
             }
         }
 
-
         public async Task<IEnumerable<InsuranceAgent>> GetAllAsync()
         {
             try
             {
-                var agents = await _context.InsuranceAgents.ToListAsync();
-                if (agents.Count == 0)
+                var agents = await _context.GetAllAsync();
+                if (!agents.Any())
                 {
                     throw new InsuranceAgentException("No insurance agents found.");
                 }

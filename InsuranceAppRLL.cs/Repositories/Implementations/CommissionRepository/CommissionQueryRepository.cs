@@ -23,16 +23,19 @@ namespace InsuranceAppRLL.Repositories.Implementations.CommissionRepository
         {
             try
             {
-                var commission = await _context.Commissions.Where(c=>c.AgentID==agentId).FirstAsync();
-                if(commission==null)
+                // Use the DbContext method to call the stored procedure
+                var totalCommission = await _context.GetTotalCommissionForAgentAsync(agentId);
+
+                if (totalCommission <= 0)
                 {
-                    throw new CommissionException("Agent does not have any commission yet");
+                    throw new CommissionException("Agent does not have any commission yet.");
                 }
-                return commission.CommissionAmount;
+
+                return totalCommission;
             }
             catch (SqlException ex)
             {
-                throw ex;
+                throw new CommissionException("An error occurred while retrieving the total commission for the agent.", ex);
             }
         }
     }

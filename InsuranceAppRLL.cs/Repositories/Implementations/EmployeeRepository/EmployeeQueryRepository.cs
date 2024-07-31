@@ -24,7 +24,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
         {
             try
             {
-                var employee = await _context.Employees.FindAsync(employeeId);
+                var employee = await _context.GetEmployeeByIdAsync(employeeId);
                 if (employee == null)
                 {
                     throw new EmployeeException($"No Employee found with id: {employeeId}");
@@ -41,7 +41,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeRepository
         {
             try
             {
-                var employees = await _context.Employees.ToListAsync();
+                var employees = await _context.GetAllEmployeesAsync();
                 if (employees.Count == 0)
                 {
                     throw new EmployeeException("No Employees found.");

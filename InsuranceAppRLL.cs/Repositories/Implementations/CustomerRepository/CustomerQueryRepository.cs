@@ -27,7 +27,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
         {
             try
             {
-                var customer = await _context.Customers.FindAsync(customerId);
+                var customer = await _context.GetCustomerByIdAsync(customerId);
                 if (customer == null)
                 {
                     throw new CustomerException($"Customer not found");
@@ -44,8 +44,8 @@ namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
         {
             try
             {
-                var customers = await _context.Customers.ToListAsync();
-                if (customers.Count == 0)
+                var customers = await _context.GetAllCustomersAsync();
+                if (!customers.Any())
                 {
                     throw new CustomerException("No customers found.");
                 }
@@ -57,22 +57,21 @@ namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
             }
         }
 
-        // Method to get customers by agent ID
-        public async Task<IEnumerable<Customer>> GetCustomersByAgentId(int agentId)
+
+        public async Task<IEnumerable<Customer>> GetCustomersByAgentIdAsync(int agentId)
         {
             try
             {
-                var customers = await _context.Customers.Where(c => c.AgentID == agentId).ToListAsync();
-
+                var customers = await _context.GetCustomersByAgentIdAsync(agentId);
                 if (!customers.Any())
                 {
-                    throw new CustomerException($"Agent Not found");
+                    throw new CustomerException($"No customers found for agent ID: {agentId}");
                 }
                 return customers;
             }
             catch (SqlException ex)
             {
-                throw new CustomerException("Error occurred while fetching data: ", ex);
+                throw new CustomerException("Error occurred while fetching data.", ex);
             }
         }
     }

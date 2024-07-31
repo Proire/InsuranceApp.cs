@@ -3,20 +3,15 @@ using InsuranceAppRLL.Entities;
 using InsuranceAppRLL.Repositories.Interfaces.AdminRepository;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace InsuranceAppRLL.Repositories.Implementations.AdminRepository
 {
     public class AdminQueryRepository : IAdminQueryRepository
     {
         private readonly InsuranceDbContext _context;
-        public AdminQueryRepository(InsuranceDbContext context) 
-        { 
+
+        public AdminQueryRepository(InsuranceDbContext context)
+        {
             _context = context;
         }
 
@@ -24,12 +19,13 @@ namespace InsuranceAppRLL.Repositories.Implementations.AdminRepository
         {
             try
             {
-                var book = await _context.Admins.FindAsync(adminId);
-                if (book == null)
+                var admin = await _context.GetAdminByIdAsync(adminId);
+                if (admin == null)
                 {
-                    throw new AdminException($"Admin Not found");
+                    throw new AdminException("Admin not found");
                 }
-                return book;
+
+                return admin;
             }
             catch (SqlException ex)
             {
@@ -41,12 +37,13 @@ namespace InsuranceAppRLL.Repositories.Implementations.AdminRepository
         {
             try
             {
-                var books = await _context.Admins.ToListAsync();
-                if (books.Count == 0)
+                var admins = await _context.GetAllAdminsAsync();
+                if (!admins.Any())
                 {
                     throw new AdminException("No Admins found.");
                 }
-                return books;
+
+                return admins;
             }
             catch (SqlException ex)
             {

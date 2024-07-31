@@ -25,20 +25,20 @@ namespace InsuranceAppRLL.Repositories.Implementations.InsurancePlanRepository
         {
             try
             {
-                List<InsurancePlan> insurancePlans = await _context.InsurancePlans.ToListAsync();
-                if(insurancePlans.Count() == 0)
+                var insurancePlans = await _context.GetAllInsurancePlansAsync();
+                if (!insurancePlans.Any())
                 {
-                    throw new InsurancePlanException("Currently, we are not Providing any Insurance Plan");
+                    throw new InsurancePlanException("Currently, we are not providing any insurance plans.");
                 }
                 return insurancePlans;
             }
-            catch (InsurancePlanException)
+            catch (SqlException ex)
             {
-                throw;
+                throw new InsurancePlanException("An error occurred while retrieving insurance plans.", ex);
             }
-            catch (SqlException)
+            catch (Exception ex)
             {
-                throw;
+                throw new InsurancePlanException("An unexpected error occurred while retrieving insurance plans.", ex);
             }
         }
 
@@ -46,20 +46,20 @@ namespace InsuranceAppRLL.Repositories.Implementations.InsurancePlanRepository
         {
             try
             {
-                InsurancePlan? insurancePlan = await _context.InsurancePlans.FindAsync(planId);
+                var insurancePlan = await _context.GetInsurancePlanByIdAsync(planId);
                 if (insurancePlan == null)
                 {
-                    throw new InsurancePlanException($"No Insurance Plan with planId {planId} exists");
+                    throw new InsurancePlanException($"No insurance plan found with ID {planId}.");
                 }
                 return insurancePlan;
             }
-            catch(InsurancePlanException)
-            {
-                throw;
-            }
             catch (SqlException ex)
             {
-                throw ex;
+                throw new InsurancePlanException("An error occurred while retrieving the insurance plan.", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new InsurancePlanException("An unexpected error occurred while retrieving the insurance plan.", ex);
             }
         }
     }

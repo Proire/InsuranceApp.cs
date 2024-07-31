@@ -1,6 +1,7 @@
 ﻿using InsuranceAppRLL.CustomExceptions;
 using InsuranceAppRLL.Entities;
 using InsuranceAppRLL.Repositories.Interfaces.EmployeeSchemeRepository;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -21,46 +22,61 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeSchemeRepository
 
         public async Task AddSchemeToEmployee(int schemeId, int employeeId)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                if(_context.EmployeeSchemes.Any(es=> es.EmployeeID==employeeId && es.SchemeID==schemeId))
-                {
-                    throw new EmployeeSchemeException("Employee with the specified Scheme already exists");
-                }
-                _context.EmployeeSchemes.Add(new EmployeeScheme {SchemeID=schemeId, EmployeeID=employeeId });
-                await _context.SaveChangesAsync();
+                await _context.AddSchemeToEmployeeAsync(schemeId, employeeId);
+                await transaction.CommitAsync();
             }
-            catch (EmployeeSchemeException ex)
+            catch (SqlException ex)
             {
-                throw new SchemeException(ex.Message);
+                await transaction.RollbackAsync();
+                throw new EmployeeSchemeException("An error occurred while adding the scheme to the employee.", ex);
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                throw new EmployeeSchemeException("An unexpected error occurred.", ex);
             }
         }
 
         public async Task DeleteEmployeeFromScheme(int employeeId)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                var employeeSchemes = await _context.EmployeeSchemes.Where(es => es.EmployeeID == employeeId).ToListAsync();
-                _context.EmployeeSchemes.RemoveRange(employeeSchemes);
-                await _context.SaveChangesAsync();
+                await _context.DeleteEmployeeFromSchemeAsync(employeeId);
+                await transaction.CommitAsync();
             }
-            catch 
+            catch (SqlException ex)
             {
-                throw;
+                await transaction.RollbackAsync();
+                throw new EmployeeSchemeException("An error occurred while deleting the employee from schemes.", ex);
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                throw new EmployeeSchemeException("An unexpected error occurred.", ex);
             }
         }
 
         public async Task DeleteSchemeFromEmployees(int schemeId)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                var employeeSchemes = await _context.EmployeeSchemes.Where(es => es.SchemeID == schemeId).ToListAsync();
-                _context.EmployeeSchemes.RemoveRange(employeeSchemes);
-                await _context.SaveChangesAsync();
+                await _context.DeleteSchemeFromEmployeesAsync(schemeId);
+                await transaction.CommitAsync();
             }
-            catch
+            catch (SqlException ex)
             {
-                throw;
+                await transaction.RollbackAsync();
+                throw new EmployeeSchemeException("An error occurred while deleting the scheme from employees.", ex);
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                throw new EmployeeSchemeException("An unexpected error occurred.", ex);
             }
         }
     }
