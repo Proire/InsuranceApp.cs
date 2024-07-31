@@ -1,4 +1,5 @@
 ﻿using InsuranceAppRLL.Entities;
+using InsuranceMLL.CommissionModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,6 @@ namespace InsuranceAppRLL.Repositories.Interfaces.CommissionRepository
 {
     public interface ICommissionCommandRepository
     {
-        public Task AddCommissionAsync(Commission commission);
+        public Task AddCommissionAsync(CommissionModel commissionModel);
     }
 }
