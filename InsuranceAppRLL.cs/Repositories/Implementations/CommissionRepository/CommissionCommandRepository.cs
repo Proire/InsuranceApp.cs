@@ -2,6 +2,8 @@
 using InsuranceAppRLL.Repositories.Interfaces.CommissionRepository;
 using InsuranceMLL.CommissionModels;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,20 +27,15 @@ namespace InsuranceAppRLL.Repositories.Implementations.CommissionRepository
                 var commissionCheck = await _context.Commissions.FindAsync(commissionModel.PolicyID);
 
                 if (commissionModel.AgentID != 0) {
-                    Commission commission = new Commission();
-                    commission.PolicyID = commissionModel.PolicyID;
-                    commissionModel.AgentID = commissionModel.AgentID;
 
-                    if (commissionCheck == null)
-                    {
-                        commission.CommissionAmount = 0.2 * commissionModel.Amount;
-                    }
-                    else if (commissionCheck != null)
-                    {
-                        commission.CommissionAmount = 0.125 * commissionModel.Amount;
-                    }
-                    await _context.Commissions.AddAsync(commission);
-                    await _context.SaveChangesAsync();
+                    var policyIdParam = new SqlParameter("@PolicyID", commissionModel.PolicyID);
+                    var agentIdParam = new SqlParameter("@AgentID", commissionModel.AgentID);
+                    var amountParam = new SqlParameter("@Amount", commissionModel.Amount);
+
+                    await _context.Database.ExecuteSqlRawAsync(
+                        "EXEC AddOrUpdateCommission @PolicyID, @AgentID, @Amount",
+                        policyIdParam, agentIdParam, amountParam
+                    );
                 }
             }
             catch (SqlException sqlEx)

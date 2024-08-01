@@ -1,3 +1,4 @@
+--Policy --Validate policy
 CREATE PROCEDURE CheckPolicyExists
     @CustomerID INT,
     @SchemeID INT
@@ -18,6 +19,8 @@ BEGIN
     END
 END;
 
+
+--Payments --Update Payment Status
 CREATE TRIGGER trg_UpdatePolicyStatusOnFirstPayment
 ON Payments
 AFTER INSERT
@@ -34,6 +37,7 @@ BEGIN
       AND (SELECT COUNT(*) FROM Payments WHERE PolicyID = p.PolicyID) = 1;
 END;
 
+--Payment  --ValidatePayment
 CREATE PROCEDURE ValidatePayment
     @CustomerID INT,
     @PolicyID INT,
@@ -99,3 +103,25 @@ BEGIN
     END
 END;
 
+--Commission --AddOrUpdateCommission
+CREATE PROCEDURE AddOrUpdateCommission
+    @PolicyID INT,
+    @AgentID INT,
+    @Amount DECIMAL(18, 2)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (SELECT 1 FROM Commissions WHERE PolicyID = @PolicyID)
+    BEGIN
+        UPDATE Commissions
+        SET CommissionAmount = 0.125 * @Amount
+        WHERE PolicyID = @PolicyID;
+    END
+    ELSE
+    BEGIN
+        -- If commission does not exist, insert a new commission with 20% of the amount
+        INSERT INTO Commissions (PolicyID, AgentID, CommissionAmount)
+        VALUES (@PolicyID, @AgentID, 0.2 * @Amount);
+    END
+END;

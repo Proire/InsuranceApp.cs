@@ -65,6 +65,14 @@ namespace InsuranceApp.cs
             //    });
             //});
 
+            //Redis
+            builder.Services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = builder.Configuration["RedisCacheOptions:Configuration"];
+                options.InstanceName = builder.Configuration["RedisCacheOptions:InstanceName"];
+            });
+            builder.Services.AddDistributedMemoryCache();
+
             // CORS Policy
             var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -112,6 +120,7 @@ namespace InsuranceApp.cs
             builder.Services.AddScoped<IPaymentQueryRepository, PaymentQueryRepository>();
 
             builder.Services.AddScoped<ICommissionQueryRepository, CommissionQueryRepository>();
+            builder.Services.AddScoped<ICommissionCommandRepository, CommissionCommandRepository>();
 
             // Business layer services
             builder.Services.AddScoped<IAdminService,AdminService>();
