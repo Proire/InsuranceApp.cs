@@ -131,12 +131,13 @@ namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
                         }
                     }
 
-                    await _context.UpdateCustomerAsync(customer.CustomerID, customer.FullName, customer.Email, customer.Password, customer.Phone, customer.DateOfBirth, customer.AgentID);
+                    await _context.UpdateCustomerAsync(customer.CustomerID, customer.FullName, customer.Email, customer.Password, customer.Phone, customer.DateOfBirth, existingCustomer.AgentID);
 
                     await transaction.CommitAsync();
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine(ex.Message);
                     await transaction.RollbackAsync();
                     throw new CustomerException("An error occurred while updating the customer in the database.", ex);
                 }
@@ -165,6 +166,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine(ex.Message);
                     await transaction.RollbackAsync();
                     throw new CustomerException("An error occurred while deleting the customer from the database.", ex);
                 }

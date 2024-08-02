@@ -16,7 +16,7 @@ namespace InsuranceAppBLL.CustomerService
 
         Task DeleteCustomerAsync(int customerId);
 
-        Task UpdateCustomerAsync(CustomerUpdateModel customer, int customerId, int agentId);
+        Task UpdateCustomerAsync(CustomerUpdateModel customer, int customerId);
 
         Task<IEnumerable<Customer>> GetAllCustomersAsync();
 

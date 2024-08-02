@@ -54,7 +54,7 @@ namespace InsuranceAppRLL
             );
         }
 
-        public async Task DeleteAdminAsync(int adminId)
+        public async Task ExecuteDeleteAdminStoredProcedureAsync(int adminId)
         {
             var adminIdParam = new SqlParameter("@AdminID", adminId);
 
@@ -127,8 +127,13 @@ namespace InsuranceAppRLL
         public async Task<Employee> GetEmployeeByIdAsync(int employeeId)
         {
             var parameter = new SqlParameter("@EmployeeID", employeeId);
-            return await Employees.FromSqlRaw("EXEC GetEmployeeById @EmployeeID", parameter).FirstOrDefaultAsync();
+            var result = await Employees
+                .FromSqlRaw("EXEC GetEmployeeById @EmployeeID", parameter)
+                .ToListAsync(); // Ensures the query is executed and results are fetched
+
+            return result.FirstOrDefault(); // Returns the first employee or null if no results
         }
+
 
         public async Task<List<Employee>> GetAllEmployeesAsync()
         {
@@ -156,10 +161,14 @@ namespace InsuranceAppRLL
         // Method to call stored procedure for fetching a customer by ID
         public async Task<Customer> GetCustomerByIdAsync(int customerId)
         {
-            return await Customers
-                .FromSqlRaw("EXEC GetCustomerById @CustomerID", new SqlParameter("@CustomerID", customerId))
-                .SingleOrDefaultAsync();
+            var parameter = new SqlParameter("@CustomerID", customerId);
+            var result = await Customers
+                .FromSqlRaw("EXEC GetCustomerById @CustomerID", parameter)
+                .ToListAsync(); // Ensures the query is executed and results are fetched
+
+            return result.FirstOrDefault(); // Returns the first customer or null if no results
         }
+
 
         // Method to call stored procedure for fetching all customers
         public async Task<IEnumerable<Customer>> GetAllCustomersAsync()
@@ -172,10 +181,14 @@ namespace InsuranceAppRLL
         // Method to call stored procedure for fetching customers by agent ID
         public async Task<IEnumerable<Customer>> GetCustomersByAgentIdAsync(int agentId)
         {
-            return await Customers
-                .FromSqlRaw("EXEC GetCustomersByAgentId @AgentID", new SqlParameter("@AgentID", agentId))
-                .ToListAsync();
+            var parameter = new SqlParameter("@AgentID", agentId);
+            var result = await Customers
+                .FromSqlRaw("EXEC GetCustomersByAgentId @AgentID", parameter)
+                .ToListAsync(); // Ensures the query is executed and results are fetched
+
+            return result; // Returns the list of customers
         }
+
 
         // agents 
         public async Task RegisterInsuranceAgentAsync(InsuranceAgent agent)
@@ -213,10 +226,16 @@ namespace InsuranceAppRLL
 
         public async Task<InsuranceAgent> GetAgentByIDAsync(int agentId)
         {
-            var parameter = new SqlParameter("@AgentID", agentId);
-            var agent = await InsuranceAgents.FromSqlRaw("EXEC GetInsuranceAgentByID @AgentID", parameter).SingleOrDefaultAsync();
-            return agent;
+            var agentIdParam = new SqlParameter("@AgentID", agentId);
+
+            var result = await InsuranceAgents
+                .FromSqlRaw("EXEC GetInsuranceAgentByID @AgentID", agentIdParam)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return result.FirstOrDefault();
         }
+
 
         public async Task<IEnumerable<InsuranceAgent>> GetAllAsync()
         {
@@ -273,15 +292,17 @@ namespace InsuranceAppRLL
 
             var parameters = new[]
             {
-            new SqlParameter("@PlanName", planName),
-            new SqlParameter("@PlanDetails", planDetails),
-            planIdParam
-        };
+                new SqlParameter("@PlanName", planName),
+                new SqlParameter("@PlanDetails", planDetails),
+                new SqlParameter("@CreatedAt", DateTime.UtcNow),
+                planIdParam
+            };
 
-            await Database.ExecuteSqlRawAsync("EXEC AddInsurancePlan @PlanID OUTPUT, @PlanName, @PlanDetails", parameters);
+            await Database.ExecuteSqlRawAsync("EXEC AddInsurancePlan @PlanID OUTPUT, @PlanName, @PlanDetails, @CreatedAt", parameters);
 
             return (int)planIdParam.Value;
         }
+
 
         public async Task DeleteInsurancePlanAsync(int planId)
         {
@@ -308,9 +329,16 @@ namespace InsuranceAppRLL
 
         public async Task<InsurancePlan> GetInsurancePlanByIdAsync(int planId)
         {
-            var parameter = new SqlParameter("@PlanID", planId);
-            return await InsurancePlans.FromSqlRaw("EXEC GetInsurancePlanById @PlanID", parameter).SingleOrDefaultAsync();
+            var planIdParam = new SqlParameter("@PlanID", planId);
+
+            var result = await InsurancePlans
+                .FromSqlRaw("EXEC GetInsurancePlanById @PlanID", planIdParam)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return result.FirstOrDefault();
         }
+
 
         // payments 
         public async Task AddPaymentAsync(int customerId, int policyId, double amount)
@@ -325,6 +353,58 @@ namespace InsuranceAppRLL
             await Database.ExecuteSqlRawAsync("EXEC AddPayment @CustomerID, @PolicyID, @Amount", parameters);
         }
 
+        //  Login 
+        // Method to call GetEmployeeByEmail stored procedure
+        public async Task<Employee> GetEmployeeByEmailAsync(string email)
+        {
+            var emailParam = new SqlParameter("@Email", email);
+
+            var result = await Employees
+                .FromSqlRaw("EXEC GetEmployeeByEmail @Email", emailParam)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return result.FirstOrDefault();
+        }
+
+        // Method to call GetAdminByEmail stored procedure
+        public async Task<Admin> GetAdminByEmailAsync(string email)
+        {
+            var emailParam = new SqlParameter("@Email", email);
+
+            var result = await Admins
+                .FromSqlRaw("EXEC GetAdminByEmail @Email", emailParam)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return result.FirstOrDefault();
+        }
+
+        // Method to call GetCustomerByEmail stored procedure
+        public async Task<Customer> GetCustomerByEmailAsync(string email)
+        {
+            var emailParam = new SqlParameter("@Email", email);
+
+            var result = await Customers
+                .FromSqlRaw("EXEC GetCustomerByEmail @Email", emailParam)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return result.FirstOrDefault();
+        }
+
+        // Method to call GetInsuranceAgentByEmail stored procedure
+        public async Task<InsuranceAgent> GetInsuranceAgentByEmailAsync(string email)
+        {
+            var emailParam = new SqlParameter("@Email", email);
+
+            var result = await InsuranceAgents
+                .FromSqlRaw("EXEC GetInsuranceAgentByEmail @Email", emailParam)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return result.FirstOrDefault();
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -19,7 +19,7 @@ namespace InsuranceAppRLL.CQRS.Handlers.CustomerHandlers
         }
         public async Task<IEnumerable<Customer>> Handle(GetCustomerByAgentIdQuery request, CancellationToken cancellationToken)
         {
-            return await _customerQueryRepository.GetCustomersByAgentId(request.AgentId);
+            return await _customerQueryRepository.GetCustomersByAgentIdAsync(request.AgentId);
         }
     }
 }

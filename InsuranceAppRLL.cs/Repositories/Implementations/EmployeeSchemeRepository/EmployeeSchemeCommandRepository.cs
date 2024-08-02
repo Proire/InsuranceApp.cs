@@ -22,60 +22,55 @@ namespace InsuranceAppRLL.Repositories.Implementations.EmployeeSchemeRepository
 
         public async Task AddSchemeToEmployee(int schemeId, int employeeId)
         {
-            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 await _context.AddSchemeToEmployeeAsync(schemeId, employeeId);
-                await transaction.CommitAsync();
             }
             catch (SqlException ex)
             {
-                await transaction.RollbackAsync();
+                Console.WriteLine(ex.Message);
                 throw new EmployeeSchemeException("An error occurred while adding the scheme to the employee.", ex);
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync();
                 throw new EmployeeSchemeException("An unexpected error occurred.", ex);
             }
         }
 
         public async Task DeleteEmployeeFromScheme(int employeeId)
         {
-            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 await _context.DeleteEmployeeFromSchemeAsync(employeeId);
-                await transaction.CommitAsync();
             }
             catch (SqlException ex)
             {
-                await transaction.RollbackAsync();
+              
                 throw new EmployeeSchemeException("An error occurred while deleting the employee from schemes.", ex);
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync();
+               
                 throw new EmployeeSchemeException("An unexpected error occurred.", ex);
             }
         }
 
         public async Task DeleteSchemeFromEmployees(int schemeId)
         {
-            using var transaction = await _context.Database.BeginTransactionAsync();
+            
             try
             {
                 await _context.DeleteSchemeFromEmployeesAsync(schemeId);
-                await transaction.CommitAsync();
+             
             }
             catch (SqlException ex)
             {
-                await transaction.RollbackAsync();
+              Console.WriteLine(ex.Message);
                 throw new EmployeeSchemeException("An error occurred while deleting the scheme from employees.", ex);
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync();
+               
                 throw new EmployeeSchemeException("An unexpected error occurred.", ex);
             }
         }

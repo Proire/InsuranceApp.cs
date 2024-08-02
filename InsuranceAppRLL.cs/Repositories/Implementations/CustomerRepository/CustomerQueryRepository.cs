@@ -65,7 +65,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.CustomerRepository
                 var customers = await _context.GetCustomersByAgentIdAsync(agentId);
                 if (!customers.Any())
                 {
-                    throw new CustomerException($"No customers found for agent ID: {agentId}");
+                    throw new CustomerException($"No customers found");
                 }
                 return customers;
             }

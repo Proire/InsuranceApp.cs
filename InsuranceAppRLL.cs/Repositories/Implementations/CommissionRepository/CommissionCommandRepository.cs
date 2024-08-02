@@ -2,6 +2,7 @@
 using InsuranceAppRLL.Repositories.Interfaces.CommissionRepository;
 using InsuranceMLL.CommissionModels;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,29 +23,39 @@ namespace InsuranceAppRLL.Repositories.Implementations.CommissionRepository
         {
             try
             {
-                var commissionCheck = await _context.Commissions.FindAsync(commissionModel.PolicyID);
+                var commissionAmountParam = new SqlParameter
+                {
+                    ParameterName = "@CommissionAmount",
+                    SqlDbType = System.Data.SqlDbType.Float,
+                    Direction = System.Data.ParameterDirection.Output
+                };
 
-                if (commissionModel.AgentID != 0) {
-                    Commission commission = new Commission();
-                    commission.PolicyID = commissionModel.PolicyID;
-                    commissionModel.AgentID = commissionModel.AgentID;
+                var parameters = new[]
+                {
+            new SqlParameter("@AgentID", commissionModel.AgentID),
+            new SqlParameter("@PolicyID", commissionModel.PolicyID),
+            new SqlParameter("@Amount", commissionModel.Amount),
+            commissionAmountParam
+        };
 
-                    if (commissionCheck == null)
-                    {
-                        commission.CommissionAmount = 0.2 * commissionModel.Amount;
-                    }
-                    else if (commissionCheck != null)
-                    {
-                        commission.CommissionAmount = 0.125 * commissionModel.Amount;
-                    }
-                    await _context.Commissions.AddAsync(commission);
-                    await _context.SaveChangesAsync();
-                }
+                await _context.Database.ExecuteSqlRawAsync(
+                    "EXEC AddCommission @AgentID, @PolicyID, @Amount, @CommissionAmount OUTPUT",
+                    parameters);
+
+                // You can now use the commissionAmountParam.Value if needed
+                double commissionAmount = (double)commissionAmountParam.Value;
             }
             catch (SqlException sqlEx)
             {
-                throw sqlEx;
+                // Handle SQL exceptions
+                throw new Exception("An error occurred while adding the commission.", sqlEx);
+            }
+            catch (Exception ex)
+            {
+                // Handle other exceptions
+                throw new Exception("An unexpected error occurred while adding the commission.", ex);
             }
         }
+
     }
 }

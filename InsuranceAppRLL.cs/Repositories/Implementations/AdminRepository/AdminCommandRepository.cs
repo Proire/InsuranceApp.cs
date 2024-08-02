@@ -24,43 +24,32 @@ namespace InsuranceAppRLL.Repositories.Implementations.AdminRepository
 
         public async Task DeleteAdminAsync(int adminId)
         {
-            using var transaction = await _context.Database.BeginTransactionAsync();
-            Admin admin = null;
+            // Fetch the admin from the database
+            var admin = await _context.Admins.FindAsync(adminId);
+            if (admin == null)
+            {
+                throw new AdminException("Admin not found");
+            }
 
             try
             {
-                admin = await _context.Admins.FindAsync(adminId);
-                if (admin == null)
-                {
-                    throw new AdminException("Admin not found");
-                }
-
-                // Call the DbContext method to execute the stored procedure for deleting the admin
-                await _context.DeleteAdminAsync(adminId);
-
-                // Remove the admin entity from the context
-                _context.Admins.Remove(admin);
+                // Execute the stored procedure to delete the admin
+                await _context.ExecuteDeleteAdminStoredProcedureAsync(adminId);
 
                 // Save changes to the database
                 await _context.SaveChangesAsync();
 
-                // Commit the transaction
-                await transaction.CommitAsync();
-
                 // Delete the key and IV from storage
                 KeyIvManager.DeleteKeyAndIv(admin.Email);
             }
+            catch (SqlException ex)
+            {
+                // Handle SQL exceptions
+                throw new AdminException("An error occurred while deleting the admin from the database.", ex);
+            }
             catch (Exception ex)
             {
-                // Rollback the transaction if any exception occurs
-                await transaction.RollbackAsync();
-
-                // Handle specific database exceptions
-                if (ex is SqlException)
-                {
-                    throw new AdminException("An error occurred while deleting the admin from the database.", ex);
-                }
-
+                // Handle other exceptions
                 throw; // Re-throw other exceptions
             }
         }

@@ -35,20 +35,21 @@ namespace InsuranceAppRLL.Repositories.Implementations
                 switch (model.Role.ToLower())
                 {
                     case "employee":
-                        user = await _context.Employees.FirstOrDefaultAsync(x => x.Email == model.Email);
+                        user = await _context.GetEmployeeByEmailAsync(model.Email);
                         break;
                     case "admin":
-                        user = await _context.Admins.FirstOrDefaultAsync(x => x.Email == model.Email);
+                        user = await _context.GetAdminByEmailAsync(model.Email);
                         break;
                     case "customer":
-                        user = await _context.Customers.FirstOrDefaultAsync(x => x.Email == model.Email);
+                        user = await _context.GetCustomerByEmailAsync(model.Email);
                         break;
                     case "agent":
-                        user = await _context.InsuranceAgents.FirstOrDefaultAsync(x => x.Email == model.Email);
+                        user = await _context.GetInsuranceAgentByEmailAsync(model.Email);
                         break;
                     default:
                         throw new LoginException("Invalid Role");
                 }
+
 
                 if (user == null)
                 {
@@ -67,7 +68,9 @@ namespace InsuranceAppRLL.Repositories.Implementations
                     _ => throw new LoginException("Invalid Role")
                 };
 
-                string username = user.Username;
+                string username = string.Empty;
+                if(model.Role != "customer")
+                    username = user.Username;
                 (byte[] key, byte[] iv) = KeyIvManager.GetKeyAndIv(email);
                 byte[] cipheredPassword = Convert.FromBase64String(password);
                 string decryptedPassword = PasswordHasher.VerifyPassword(cipheredPassword, key, iv);

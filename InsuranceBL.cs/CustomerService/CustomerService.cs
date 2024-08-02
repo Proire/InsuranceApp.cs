@@ -48,7 +48,7 @@ namespace InsuranceAppBLL.CustomerService
             return await _mediator.Send(new GetAllCustomersQuery());
         }
 
-        public async Task UpdateCustomerAsync(CustomerUpdateModel customerUpdateModel, int customerId, int agentId)
+        public async Task UpdateCustomerAsync(CustomerUpdateModel customerUpdateModel, int customerId)
         {
             await _mediator.Send(new UpdateCustomerCommand(
                 customerId,
@@ -56,8 +56,7 @@ namespace InsuranceAppBLL.CustomerService
                 customerUpdateModel.Email,
                 customerUpdateModel.Password,
                 customerUpdateModel.Phone,
-                customerUpdateModel.DateOfBirth,
-                agentId
+                customerUpdateModel.DateOfBirth
             ));
         }
 

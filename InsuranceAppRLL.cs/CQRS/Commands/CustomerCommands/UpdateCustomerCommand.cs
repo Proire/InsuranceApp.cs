@@ -15,10 +15,9 @@ namespace InsuranceAppRLL.CQRS.Commands.CustomerCommands
         public string Password { get; set; }
         public string Phone { get; set; }
         public DateTime DateOfBirth { get; set; }
+  
 
-        public int AgentId { get; set; }    
-
-        public UpdateCustomerCommand(int customerId, string fullName, string email, string password, string phone, DateTime dateOfBirth, int agentId)
+        public UpdateCustomerCommand(int customerId, string fullName, string email, string password, string phone, DateTime dateOfBirth)
         {
             CustomerId = customerId;
             FullName = fullName;
@@ -26,7 +25,6 @@ namespace InsuranceAppRLL.CQRS.Commands.CustomerCommands
             Password = password;
             Phone = phone;
             DateOfBirth = dateOfBirth;
-            AgentId = agentId;
         }
     }
 }

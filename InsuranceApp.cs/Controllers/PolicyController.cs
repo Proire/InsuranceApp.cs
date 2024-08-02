@@ -84,7 +84,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
+      //   [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
         [HttpPost]
         [Route("policy/register")]
         public async Task<ActionResult<ResponseModel<string>>> CreatePolicy([FromBody] PolicyRegistrationModel policyModel)
@@ -116,7 +116,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
+       // [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
         [HttpPut("policy/update/{policyId}")]
         public async Task<ActionResult<ResponseModel<string>>> UpdatePolicy([FromBody] PolicyUpdateModel updatePolicyModel, int policyId)
         {
@@ -143,7 +143,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
+       //  [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
         [HttpDelete("policy/delete/{policyId}")]
         public async Task<ActionResult<ResponseModel<string>>> DeletePolicy(int policyId)
         {

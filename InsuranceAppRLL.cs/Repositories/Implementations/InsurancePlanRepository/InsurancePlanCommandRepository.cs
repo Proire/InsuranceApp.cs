@@ -24,6 +24,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.InsurancePlanRepository
             }
             catch (SqlException ex)
             {
+                Console.WriteLine(ex.Message);
                 await transaction.RollbackAsync();
                 throw new InsurancePlanException("An error occurred while adding the plan.", ex);
             }

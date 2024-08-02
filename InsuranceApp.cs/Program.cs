@@ -111,6 +111,7 @@ namespace InsuranceApp.cs
             builder.Services.AddScoped<IPaymentCommandRepository, PaymentCommandRepository>();
             builder.Services.AddScoped<IPaymentQueryRepository, PaymentQueryRepository>();
 
+            builder.Services.AddScoped<ICommissionCommandRepository, CommissionCommandRepository>();
             builder.Services.AddScoped<ICommissionQueryRepository, CommissionQueryRepository>();
 
             // Business layer services

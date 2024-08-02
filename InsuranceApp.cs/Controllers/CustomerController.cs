@@ -23,14 +23,14 @@ namespace InsuranceApp.Controllers
             _logger = logger;
         }
 
-        [Authorize(AuthenticationSchemes = "CustomerScheme", Roles = "Customer")]
+        //[Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles="InsuranceAgent")]
         [HttpPost]
-        [Route("customer_user/register")]
-        public async Task<ActionResult<ResponseModel<Customer>>> CreateCustomer([FromBody] CustomerRegistrationModel customer)
+        [Route("customer_user/register/{agentId}")]
+        public async Task<ActionResult<ResponseModel<Customer>>> CreateCustomer([FromBody] CustomerRegistrationModel customer,int agentId)
         {
             try
             {
-                int agentId = Convert.ToInt32(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+               // int agentId = Convert.ToInt32(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
                 await _customerService.RegisterCustomerAsync(customer,agentId);
 
@@ -57,14 +57,14 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
+       // [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
         [HttpGet]
-        [Route("customer_user/agent/customers")]
-        public async Task<ResponseModel<IEnumerable<Customer>>> GetCustomersByAgentIdAsync()
+        [Route("customer_user/agent/customers/{agentId}")]
+        public async Task<ResponseModel<IEnumerable<Customer>>> GetCustomersByAgentIdAsync(int agentId)
         {
             try
             {
-                int agentId = Convert.ToInt32(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+               // int agentId = Convert.ToInt32(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
                 // Call the repository method to get the customers
                 var customers = await _customerService.GetCustomers(agentId);
 
@@ -96,15 +96,15 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = "CustomerScheme", Roles = "Customer")]
+       // [Authorize(AuthenticationSchemes = "CustomerScheme", Roles = "Customer")]
         [HttpPut("customer_user/{customerId}")]
         public async Task<ActionResult<ResponseModel<string>>> UpdateCustomer([FromBody] CustomerUpdateModel customerUpdateModel, int customerId)
         {
             try
             {
-                int agentId = Convert.ToInt32(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                //int CustomerId = Convert.ToInt32(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-                await _customerService.UpdateCustomerAsync(customerUpdateModel, customerId, agentId);
+                await _customerService.UpdateCustomerAsync(customerUpdateModel, customerId);
                 return new ResponseModel<string>
                 {
                     Message = "Customer updated successfully",
@@ -121,7 +121,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
+       // [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
         [HttpDelete("customer_user/{customerId}")]
         public async Task<ActionResult<ResponseModel<string>>> DeleteCustomer(int customerId)
         {
@@ -144,7 +144,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
+     //   [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
         [HttpGet("customer_user/{customerId}")]
         public async Task<ActionResult<ResponseModel<Customer>>> GetCustomerById(int customerId)
         {
@@ -168,7 +168,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
+       
         [HttpGet("customer_user/Customers")]
         public async Task<ActionResult<ResponseModel<IEnumerable<Customer>>>> GetAllCustomers()
         {

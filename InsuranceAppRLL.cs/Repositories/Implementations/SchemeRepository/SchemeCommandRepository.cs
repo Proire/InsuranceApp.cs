@@ -56,7 +56,8 @@ namespace InsuranceAppRLL.Repositories.Implementations.SchemeRepository
                         new SqlParameter("@SchemePrice", scheme.SchemePrice),
                         new SqlParameter("@SchemeCover", scheme.SchemeCover),
                         new SqlParameter("@SchemeTenure", scheme.SchemeTenure),
-                        new SqlParameter("@PlanID", scheme.PlanID)
+                        new SqlParameter("@PlanID", scheme.PlanID),
+                        new SqlParameter("@CreatedAt", DateTime.UtcNow)
                     };
 
                     var schemeIdParam = new SqlParameter
@@ -67,7 +68,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.SchemeRepository
                     };
 
                     await _context.Database.ExecuteSqlRawAsync(
-                        "EXEC AddScheme @SchemeName, @SchemeDetails, @SchemePrice, @SchemeCover, @SchemeTenure, @PlanID, @SchemeID OUTPUT",
+                        "EXEC AddScheme @SchemeName, @SchemeDetails, @SchemePrice, @SchemeCover, @SchemeTenure, @PlanID, @CreatedAt, @SchemeID OUTPUT",
                         addSchemeParams.Concat(new[] { schemeIdParam }).ToArray());
 
                     scheme.SchemeID = (int)schemeIdParam.Value;
@@ -77,6 +78,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.SchemeRepository
                 }
                 catch (SqlException ex)
                 {
+                    Console.WriteLine(ex.Message);
                     await transaction.RollbackAsync();
                     throw new SchemeException("An error occurred while adding the scheme.", ex);
                 }
@@ -119,20 +121,24 @@ namespace InsuranceAppRLL.Repositories.Implementations.SchemeRepository
 
                     var updateSchemeParams = new[]
                     {
-                        new SqlParameter("@SchemeID", scheme.SchemeID),
-                        new SqlParameter("@SchemeName", scheme.SchemeName),
-                        new SqlParameter("@SchemeDetails", scheme.SchemeDetails),
-                        new SqlParameter("@PlanID", scheme.PlanID)
+                            new SqlParameter("@SchemeID", scheme.SchemeID),
+                            new SqlParameter("@SchemeName", scheme.SchemeName),
+                            new SqlParameter("@SchemeDetails", scheme.SchemeDetails),
+                            new SqlParameter("@SchemePrice", scheme.SchemePrice),        // Added parameter
+                            new SqlParameter("@SchemeCover", scheme.SchemeCover),        // Added parameter
+                            new SqlParameter("@SchemeTenure", scheme.SchemeTenure),      // Added parameter
+                            new SqlParameter("@PlanID", scheme.PlanID)
                     };
 
                     await _context.Database.ExecuteSqlRawAsync(
-                        "EXEC UpdateScheme @SchemeID, @SchemeName, @SchemeDetails, @PlanID",
+                        "EXEC UpdateScheme @SchemeID, @SchemeName, @SchemeDetails, @SchemePrice, @SchemeCover, @SchemeTenure, @PlanID",
                         updateSchemeParams);
 
                     await transaction.CommitAsync();
                 }
                 catch (SqlException ex)
                 {
+                    Console.WriteLine(ex.Message);
                     await transaction.RollbackAsync();
                     throw new SchemeException("An error occurred while updating the scheme.", ex);
                 }
@@ -167,6 +173,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.SchemeRepository
                 }
                 catch (SqlException ex)
                 {
+                    Console.WriteLine(ex.Message);
                     await transaction.RollbackAsync();
                     throw new SchemeException("An error occurred while deleting the scheme.", ex);
                 }

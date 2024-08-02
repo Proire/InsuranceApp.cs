@@ -28,8 +28,7 @@ namespace InsuranceAppRLL.CQRS.Handlers.CustomerHandlers
                 Email = request.Email,
                 Password = request.Password,
                 Phone = request.Phone,
-                DateOfBirth = request.DateOfBirth,
-                AgentID = request.AgentId
+                DateOfBirth = request.DateOfBirth
             };
 
             await _customerCommandRepository.UpdateCustomerAsync(customer);

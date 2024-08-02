@@ -98,6 +98,7 @@ namespace InsuranceAppRLL.Repositories.Implementations.InsuranceAgentRepository
             catch (SqlException ex)
             {
                 await transaction.RollbackAsync();
+                Console.WriteLine(ex.Message);  
                 throw new InsuranceAgentException("An error occurred while deleting the agent from the database.", ex);
             }
         }
