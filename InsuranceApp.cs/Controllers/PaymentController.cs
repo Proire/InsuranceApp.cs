@@ -21,7 +21,7 @@ namespace InsuranceApp.Controllers
             _logger = logger;
         }
 
-       // [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
+        [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
         [HttpPost("payment/create")]
         public async Task<ActionResult<ResponseModel<string>>> CreatePayment([FromBody] PaymentCreationModel paymentModel)
         {
@@ -49,8 +49,10 @@ namespace InsuranceApp.Controllers
                 return BadRequest(responseModel);
             }
         }
-
-       [HttpGet("payments/policy/{policyId}")]
+        
+        [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
+        [Authorize(AuthenticationSchemes = "CustomerScheme", Roles = "Customer")]
+        [HttpGet("payments/policy/{policyId}")]
         public async Task<ActionResult<ResponseModel<IEnumerable<Payment>>>> GetPaymentsForPolicyAsync(int policyId)
         {
             try
@@ -75,6 +77,8 @@ namespace InsuranceApp.Controllers
             }
         }
 
+        [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
+        [Authorize(AuthenticationSchemes = "CustomerScheme", Roles = "Customer")]
         [HttpGet("payments/customer/{customerId}")]
         public async Task<ActionResult<ResponseModel<IEnumerable<Payment>>>> GetPaymentsForCustomerAsync(int customerId)
         {

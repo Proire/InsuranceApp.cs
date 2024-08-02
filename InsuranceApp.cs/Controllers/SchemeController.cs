@@ -80,7 +80,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
-       // [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "Employee")]
+        [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "Employee")]
         [HttpPost]
         [Route("plan/create")]
         public async Task<ActionResult<ResponseModel<Scheme>>> CreateScheme([FromBody] SchemeRegistrationModel schemeModel)
@@ -112,7 +112,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
-       // [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "Employee")]
+        [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "Employee")]
         [HttpPut("plan/{schemeId}")]
         public async Task<ActionResult<ResponseModel<string>>> UpdateScheme([FromBody] SchemeUpdateModel schemeModel, int schemeId)
         {
@@ -143,7 +143,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
-       // [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "Employee")]
+        [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "Employee")]
         [HttpDelete("plan/{schemeId}")]
         public async Task<ActionResult<ResponseModel<string>>> DeleteScheme(int schemeId)
         {
