@@ -80,7 +80,13 @@ namespace InsuranceApp.cs
             });
 
             builder.Services.AddControllers();
-            builder.Services.AddDbContext<InsuranceDbContext>(options => options.UseSqlServer(Environment.GetEnvironmentVariable("InsuranceDbConnection") ?? string.Empty));
+
+            // Add Appsettings Configuration Builder 
+            builder.Configuration.SetBasePath(AppDomain.CurrentDomain.BaseDirectory).AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+            // Getting Values from AppSettings.json
+            var config = builder.Configuration;
+
+            builder.Services.AddDbContext<InsuranceDbContext>(options => options.UseSqlServer(config["ConnectionStrings:EInsurance"]));
 
             // Register Repositories
             builder.Services.AddScoped<IAdminCommandRepository, AdminCommandRepository>();
@@ -135,12 +141,7 @@ namespace InsuranceApp.cs
             builder.Services.AddScoped<RabitMQProducer>();
 
             // JWT Configurations
-            // Add Appsettings Configuration Builder 
-            builder.Configuration.SetBasePath(AppDomain.CurrentDomain.BaseDirectory).AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-
-            // Getting Values from AppSettings.json
-            var config = builder.Configuration;
-            var secretKey = Environment.GetEnvironmentVariable("SecretKey");
+            var secretKey = config["Jwt:SecretKey"];
             var issuer = config["Jwt:ValidIssuer"];
             var audience = config["Jwt:ValidAudience"];
 
@@ -224,6 +225,12 @@ namespace InsuranceApp.cs
                 };
             });
 
+            // IIS Configuration
+            builder.Services.Configure<IISServerOptions>(options =>
+            {
+                options.AllowSynchronousIO = true;
+            });
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -231,10 +238,15 @@ namespace InsuranceApp.cs
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
+            // Configure the HTTP request pipeline.
+            if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                    c.RoutePrefix = string.Empty; // To serve Swagger UI at the app's root
+                });
             }
 
 

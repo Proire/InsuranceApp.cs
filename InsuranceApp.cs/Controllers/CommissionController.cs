@@ -1,5 +1,6 @@
 ﻿using InsuranceAppBLL.CommissionService;
 using InsuranceAppRLL.CustomExceptions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using UserModelLayer;
@@ -19,6 +20,8 @@ namespace InsuranceApp.Controllers
             _logger = logger;
         }
 
+        [Authorize(AuthenticationSchemes = "AdminScheme", Roles = "Admin")]
+        [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
         [HttpGet("agent/{agentId}")]
         public async Task<ActionResult<ResponseModel<double>>> GetTotalCommissionForAgentAsync(int agentId)
         {

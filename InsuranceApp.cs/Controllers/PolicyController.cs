@@ -5,6 +5,7 @@ using InsuranceMLL.PolicyModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using UserModelLayer;
 
 namespace InsuranceApp.Controllers
@@ -22,12 +23,14 @@ namespace InsuranceApp.Controllers
             _logger = logger;
         }
 
+        [Authorize(AuthenticationSchemes = "CustomerScheme", Roles = "Customer")]
         [HttpGet]
-        [Route("policy/customer/{customerId}/policies")]
-        public async Task<ActionResult<ResponseModel<IEnumerable<Policy>>>> GetAllPoliciesByCustomerIdAsync(int customerId)
+        [Route("policy/customer/policies")]
+        public async Task<ActionResult<ResponseModel<IEnumerable<Policy>>>> GetAllPoliciesByCustomerIdAsync()
         {
             try
             {
+                int customerId = Convert.ToInt32(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
                 // Call the service method to get all policies by customer ID
                 var policies = await _policyService.GetAllPoliciesForCustomersAsync(customerId);
 
@@ -60,6 +63,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
+
         [HttpGet("policy/{policyId}")]
         public async Task<ActionResult<ResponseModel<Policy>>> GetPolicyByIdAsync(int policyId)
         {
@@ -84,7 +88,8 @@ namespace InsuranceApp.Controllers
             }
         }
 
-      //   [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
+        [Authorize(AuthenticationSchemes = "CustomerScheme", Roles = "Customer")]
+        [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
         [HttpPost]
         [Route("policy/register")]
         public async Task<ActionResult<ResponseModel<string>>> CreatePolicy([FromBody] PolicyRegistrationModel policyModel)
@@ -116,7 +121,8 @@ namespace InsuranceApp.Controllers
             }
         }
 
-       // [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
+        [Authorize(AuthenticationSchemes = "CustomerScheme", Roles = "Customer")]
+        [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
         [HttpPut("policy/update/{policyId}")]
         public async Task<ActionResult<ResponseModel<string>>> UpdatePolicy([FromBody] PolicyUpdateModel updatePolicyModel, int policyId)
         {
@@ -143,7 +149,8 @@ namespace InsuranceApp.Controllers
             }
         }
 
-       //  [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
+        [Authorize(AuthenticationSchemes = "CustomerScheme", Roles = "Customer")]
+        [Authorize(AuthenticationSchemes = "InsuranceAgentScheme", Roles = "InsuranceAgent")]
         [HttpDelete("policy/delete/{policyId}")]
         public async Task<ActionResult<ResponseModel<string>>> DeletePolicy(int policyId)
         {

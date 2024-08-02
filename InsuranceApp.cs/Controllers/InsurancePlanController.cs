@@ -22,7 +22,7 @@ namespace InsuranceApp.Controllers
             _logger = logger;
         }
 
-      //  [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "Employee")]
+        [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "Employee")]
         [HttpPost]
         [Route("plan/create")]
         public async Task<ActionResult<ResponseModel<string>>> CreateInsurancePlan([FromBody] InsurancePlanCreationModel insurancePlan)
@@ -54,7 +54,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        //[Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "Employee")]
+        [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "Employee")]
         [HttpDelete("plan/delete/{planId}")]
         public async Task<ResponseModel<string>> DeleteInsurancePlan(int planId)
         {
@@ -123,7 +123,7 @@ namespace InsuranceApp.Controllers
             }
         }
 
-        //[Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "Employee")]
+        [Authorize(AuthenticationSchemes = "EmployeeScheme", Roles = "Employee")]
         [HttpPut("plan/updateInsurancePlan/{planId}")]
         public async Task<ResponseModel<string>> UpdateInsurancePlan([FromBody] UpdateInsurancePlanModel insurancePlanModel, int planId)
         {

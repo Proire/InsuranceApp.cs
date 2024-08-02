@@ -11,7 +11,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InsuranceAppRLL", "Insuranc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InsuranceMLL", "InsuranceMLL.cs\InsuranceMLL.csproj", "{215B7736-F6AA-46E7-BEEE-21A23A4D2DBB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmailService", "EmailService\EmailService.csproj", "{EFBD5662-EF6F-4711-8483-C0A1BD1DD70A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailService", "EmailService\EmailService.csproj", "{EFBD5662-EF6F-4711-8483-C0A1BD1DD70A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6212028E-9AB9-426B-9261-6FEBD34E6F0D} = {6212028E-9AB9-426B-9261-6FEBD34E6F0D}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
